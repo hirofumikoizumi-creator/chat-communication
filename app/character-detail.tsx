@@ -20,7 +20,9 @@ export default function CharacterDetailScreen() {
   const router = useRouter();
   const { characterId } = useLocalSearchParams<{ characterId: string }>();
   const character = characterId ? getCharacterById(characterId) : null;
-  const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
+  const [selectedScenario, setSelectedScenario] = useState<string | null>(
+    SCENARIOS[0]?.id ?? null
+  );
   const [isLoading, setIsLoading] = useState(false);
   const initializeSession = useChatStore((state) => state.initializeSession);
 
@@ -64,6 +66,7 @@ export default function CharacterDetailScreen() {
 
         <View style={styles.scenariosSection}>
           <Text style={styles.sectionTitle}>ミッションを選択</Text>
+          <Text style={styles.sectionHelp}>最初のミッションを選択済みです。変更したい場合は別のミッションを選んでください。</Text>
           {SCENARIOS.map((scenario) => (
             <TouchableOpacity
               key={scenario.id}
@@ -101,7 +104,7 @@ export default function CharacterDetailScreen() {
           disabled={!selectedScenario || isLoading}
         >
           <Text style={styles.startButtonText}>
-            {isLoading ? 'ロード中...' : 'チャットを開始'}
+            {isLoading ? 'ロード中...' : '選択中のミッションでチャットを開始'}
           </Text>
         </TouchableOpacity>
 
@@ -177,6 +180,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 12,
+  },
+  sectionHelp: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 18,
     marginBottom: 12,
   },
   scenarioCard: {
