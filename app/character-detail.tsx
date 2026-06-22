@@ -8,11 +8,13 @@ import {
   SafeAreaView,
   Alert,
   ImageBackground,
+  Image,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getCharacterById } from '@/src/data/characters';
 import { SCENARIOS } from '@/src/data/scenarios';
 import { characterImages } from '@/src/data/characterImages';
+import { characterGalleryImages } from '@/src/data/characterGallery';
 import { sessionAPI } from '@/src/services/api';
 import { useChatStore } from '@/src/store/chatStore';
 
@@ -35,6 +37,7 @@ export default function CharacterDetailScreen() {
   }
 
   const characterImage = characterImages[character.id as keyof typeof characterImages];
+  const gallery = characterGalleryImages[character.id] ?? [];
 
   const handleStartChat = async (scenarioId: string) => {
     try {
@@ -65,6 +68,29 @@ export default function CharacterDetailScreen() {
             <Text style={styles.characterDescription}>{character.description}</Text>
           </View>
         </ImageBackground>
+
+        {gallery.length > 0 && (
+          <View style={styles.gallerySection}>
+            <View style={styles.galleryHeader}>
+              <Text style={styles.sectionTitle}>最近の写真</Text>
+              <Text style={styles.galleryCount}>{gallery.length}枚</Text>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.galleryContent}
+            >
+              {gallery.map((item) => (
+                <View key={item.label} style={styles.galleryCard}>
+                  <Image source={item.image} style={styles.galleryImage} />
+                  <View style={styles.galleryLabelWrap}>
+                    <Text style={styles.galleryLabel}>{item.label}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         <View style={styles.scenariosSection}>
           <Text style={styles.sectionTitle}>ミッションを選択</Text>
@@ -174,6 +200,54 @@ const styles = StyleSheet.create({
   },
   scenariosSection: {
     marginBottom: 24,
+  },
+  gallerySection: {
+    marginBottom: 24,
+  },
+  galleryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  galleryCount: {
+    color: '#8D8178',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  galleryContent: {
+    paddingRight: 12,
+    gap: 12,
+  },
+  galleryCard: {
+    width: 148,
+    height: 188,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E9E1DB',
+  },
+  galleryImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  galleryLabelWrap: {
+    position: 'absolute',
+    left: 8,
+    right: 8,
+    bottom: 8,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: 'rgba(0,0,0,0.48)',
+  },
+  galleryLabel: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
+    textAlign: 'center',
   },
   sectionTitle: {
     fontSize: 18,
