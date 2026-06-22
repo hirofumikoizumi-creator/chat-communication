@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -26,17 +26,14 @@ export default function HomeScreen() {
   const userProfile = useChatStore((state) => state.userProfile);
   const setUserProfile = useChatStore((state) => state.setUserProfile);
 
-  const cards = useMemo(
-    () =>
-      CHARACTERS.map((character) => ({
-        ...character,
-        image: characterImages[character.id as keyof typeof characterImages],
-      })),
-    []
-  );
+  const cards = CHARACTERS.map((character) => ({
+    ...character,
+    image: characterImages[character.id as keyof typeof characterImages],
+  }));
 
   const currentCard = cards[currentIndex % cards.length];
   const nextCard = cards[(currentIndex + 1) % cards.length];
+  const currentPosition = (currentIndex % cards.length) + 1;
 
   const rotate = position.x.interpolate({
     inputRange: [-width / 2, 0, width / 2],
@@ -203,6 +200,7 @@ export default function HomeScreen() {
             </View>
 
             <View style={styles.profileOverlay}>
+              <Text style={styles.cardCounter}>{currentPosition}/{cards.length}</Text>
               <View style={styles.nameRow}>
                 <Text style={styles.name}>{currentCard.name}</Text>
                 <Text style={styles.age}>{currentCard.age}</Text>
@@ -409,6 +407,18 @@ const styles = StyleSheet.create({
     paddingTop: 84,
     paddingBottom: 24,
     backgroundColor: 'rgba(0,0,0,0.43)',
+  },
+  cardCounter: {
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.22)',
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '900',
   },
   nameRow: {
     flexDirection: 'row',
