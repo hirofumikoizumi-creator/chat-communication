@@ -16,6 +16,12 @@ export interface EvaluationResult {
   improvements: string[];
 }
 
+export interface UserProfileForLlm {
+  name?: string;
+  age?: string;
+  job?: string;
+}
+
 export interface ApiError {
   message: string;
   code?: string;
@@ -37,18 +43,20 @@ export const chatAPI = {
     characterId: string,
     scenarioId: string,
     userMessage: string,
-    conversationHistory: ChatMessage[]
+    conversationHistory: ChatMessage[],
+    userProfile?: UserProfileForLlm
   ): Promise<string> {
-    return generateOnDeviceReply(characterId, scenarioId, userMessage, conversationHistory);
+    return generateOnDeviceReply(characterId, scenarioId, userMessage, conversationHistory, userProfile);
   },
 
   async evaluateSession(
     sessionId: string,
     characterId: string,
     scenarioId: string,
-    conversationHistory: ChatMessage[]
+    conversationHistory: ChatMessage[],
+    userProfile?: UserProfileForLlm
   ): Promise<EvaluationResult> {
-    const evaluation = await evaluateOnDevice(characterId, scenarioId, conversationHistory);
+    const evaluation = await evaluateOnDevice(characterId, scenarioId, conversationHistory, userProfile);
     const session = sessions.get(sessionId);
     if (session) {
       session.evaluation = evaluation;
@@ -77,4 +85,3 @@ export const sessionAPI = {
     return sessions.get(sessionId) || null;
   },
 };
-

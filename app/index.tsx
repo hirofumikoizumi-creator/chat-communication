@@ -7,12 +7,14 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { CHARACTERS } from '@/src/data/characters';
 import { characterImages } from '@/src/data/characterImages';
+import { useChatStore } from '@/src/store/chatStore';
 
 const { width } = Dimensions.get('window');
 const SWIPE_THRESHOLD = Math.min(120, width * 0.28);
@@ -21,6 +23,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const position = useRef(new Animated.ValueXY()).current;
+  const userProfile = useChatStore((state) => state.userProfile);
+  const setUserProfile = useChatStore((state) => state.setUserProfile);
 
   const cards = useMemo(
     () =>
@@ -130,6 +134,37 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.introPanel}>
+        <Text style={styles.introTitle}>マッチ後の会話を、実戦前に練習。</Text>
+        <Text style={styles.introCopy}>
+          あなたのプロフィールを相手役AIが読み取り、年齢や職業に合った自然な返答と評価に反映します。
+        </Text>
+        <View style={styles.profileRow}>
+          <TextInput
+            style={[styles.profileInput, styles.nameInput]}
+            placeholder="名前"
+            placeholderTextColor="#A69B94"
+            value={userProfile.name}
+            onChangeText={(name) => setUserProfile({ name })}
+          />
+          <TextInput
+            style={styles.ageInput}
+            placeholder="年齢"
+            placeholderTextColor="#A69B94"
+            keyboardType="number-pad"
+            value={userProfile.age}
+            onChangeText={(age) => setUserProfile({ age })}
+          />
+        </View>
+        <TextInput
+          style={styles.profileInput}
+          placeholder="職業 例: 営業、エンジニア、学生"
+          placeholderTextColor="#A69B94"
+          value={userProfile.job}
+          onChangeText={(job) => setUserProfile({ job })}
+        />
+      </View>
+
       <View style={styles.deck}>
         <View style={[styles.card, styles.nextCard]}>
           <ImageBackground
@@ -214,7 +249,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
   },
   topBar: {
-    minHeight: 78,
+    minHeight: 70,
     paddingTop: 12,
     paddingBottom: 10,
     flexDirection: 'row',
@@ -245,6 +280,57 @@ const styles = StyleSheet.create({
     color: '#4B403A',
     fontSize: 28,
     lineHeight: 30,
+  },
+  introPanel: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: '#E9E1DB',
+    marginBottom: 12,
+  },
+  introTitle: {
+    color: '#25201D',
+    fontSize: 18,
+    fontWeight: '900',
+    lineHeight: 24,
+  },
+  introCopy: {
+    color: '#756B64',
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 6,
+    marginBottom: 12,
+  },
+  profileRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
+  },
+  profileInput: {
+    minHeight: 44,
+    borderRadius: 8,
+    backgroundColor: '#F7F3F0',
+    borderWidth: 1,
+    borderColor: '#E8DDD6',
+    paddingHorizontal: 12,
+    color: '#28211D',
+    fontSize: 14,
+  },
+  nameInput: {
+    flex: 1,
+  },
+  ageInput: {
+    width: 88,
+    minHeight: 44,
+    borderRadius: 8,
+    backgroundColor: '#F7F3F0',
+    borderWidth: 1,
+    borderColor: '#E8DDD6',
+    paddingHorizontal: 12,
+    color: '#28211D',
+    fontSize: 14,
   },
   deck: {
     flex: 1,

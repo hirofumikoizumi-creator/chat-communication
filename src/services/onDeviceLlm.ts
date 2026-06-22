@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import { getCharacterById } from '@/src/data/characters';
 import { getScenarioById } from '@/src/data/scenarios';
 import { ON_DEVICE_LLM } from '@/src/config/llm';
-import { ChatMessage, EvaluationResult } from '@/src/services/api';
+import type { ChatMessage, EvaluationResult, UserProfileForLlm } from '@/src/services/api';
 
 type LlamaContext = {
   completion: (
@@ -65,7 +65,20 @@ const getNativeLlama = async () => {
   }
 };
 
-const buildCharacterSystemPrompt = (characterId: string, scenarioId: string) => {
+const formatUserProfile = (userProfile?: UserProfileForLlm) => {
+  const parts = [
+    userProfile?.name ? `名前: ${userProfile.name}` : '',
+    userProfile?.age ? `年齢: ${userProfile.age}歳` : '',
+    userProfile?.job ? `職業: ${userProfile.job}` : '',
+  ].filter(Boolean);
+  return parts.length ? parts.join(' / ') : '未入力';
+};
+
+const buildCharacterSystemPrompt = (
+  characterId: string,
+  scenarioId: string,
+  userProfile?: UserProfileForLlm
+) => {
   const character = getCharacterById(characterId);
   const scenario = getScenarioById(scenarioId);
   return [
@@ -74,6 +87,8 @@ const buildCharacterSystemPrompt = (characterId: string, scenarioId: string) => 
     `性格: ${character?.personality ?? ''}`,
     `シナリオ: ${scenario?.name ?? ''}`,
     `ミッション: ${scenario?.mission ?? ''}`,
+    `ユーザープロフィール: ${formatUserProfile(userProfile)}`,
+    `ユーザーの年齢や職業に不自然さが出ないよう、話題や距離感を調整してください。`,
     `ユーザーが練習できるよう、自然な日本語で1から3文だけ返信してください。`,
     `好意的すぎず、相手のメッセージの質に合わせて少しだけ距離感を調整してください。`,
   ].join('\n');
@@ -83,7 +98,8 @@ export const generateFallbackReply = (
   characterId: string,
   scenarioId: string,
   userMessage: string,
-  history: ChatMessage[]
+  history: ChatMessage[],
+  userProfile?: UserProfileForLlm
 ) => {
   const character = getCharacterById(characterId);
   const scenario = getScenarioById(scenarioId);
@@ -92,6 +108,7 @@ export const generateFallbackReply = (
   const hasQuestion = /[?？]/.test(trimmed);
   const isShort = trimmed.length < 12;
   const hasInvite = /ご飯|カフェ|会|飲み|デート|行き/.test(trimmed);
+  const jobHint = userProfile?.job ? `${userProfile.job}のお仕事って忙しそうだけど、` : '';
 
   if (scenarioId === 'date_invite' || hasInvite) {
     return `誘ってくれてありがとう。${trimmed.includes('いつ') ? '候補を出してくれると決めやすいかも。' : 'もう少し話してからなら考えやすいかな。'}どんな雰囲気のお店を考えてる？`;
@@ -100,7 +117,7 @@ export const generateFallbackReply = (
     return `${name}です。声をかけてくれてありがとう。もう少しだけ、何に興味を持ってくれたのか聞いてみたいな。`;
   }
   if (hasQuestion) {
-    return `うん、いい質問だね。${scenario?.name === '初回メッセージ' ? '最初から話しやすい感じがして安心したよ。' : 'ちゃんと会話を広げようとしてくれてるのが伝わるよ。'}あなたはどう思う？`;
+    return `うん、いい質問だね。${jobHint}${scenario?.name === '初回メッセージ' ? '最初から話しやすい感じがして安心したよ。' : 'ちゃんと会話を広げようとしてくれてるのが伝わるよ。'}あなたはどう思う？`;
   }
   return `そうなんだ、話してくれてありがとう。${history.length > 2 ? '少しずつ雰囲気がわかってきた気がする。' : '最初の印象はやわらかくていい感じ。'}もう少し聞かせて。`;
 };
@@ -109,13 +126,14 @@ export const generateOnDeviceReply = async (
   characterId: string,
   scenarioId: string,
   userMessage: string,
-  conversationHistory: ChatMessage[]
+  conversationHistory: ChatMessage[],
+  userProfile?: UserProfileForLlm
 ) => {
   try {
     const context = await getNativeLlama();
     const result = await context.completion({
       messages: [
-        { role: 'system', content: buildCharacterSystemPrompt(characterId, scenarioId) },
+        { role: 'system', content: buildCharacterSystemPrompt(characterId, scenarioId, userProfile) },
         ...conversationHistory.map((message) => ({
           role: message.role === 'assistant' ? 'assistant' : 'user',
           content: message.content,
@@ -126,10 +144,10 @@ export const generateOnDeviceReply = async (
       temperature: ON_DEVICE_LLM.temperature,
       stop: stopWords,
     });
-    return (result.text || '').trim() || generateFallbackReply(characterId, scenarioId, userMessage, conversationHistory);
+    return (result.text || '').trim() || generateFallbackReply(characterId, scenarioId, userMessage, conversationHistory, userProfile);
   } catch (error) {
     console.warn('On-device LLM fallback:', error);
-    return generateFallbackReply(characterId, scenarioId, userMessage, conversationHistory);
+    return generateFallbackReply(characterId, scenarioId, userMessage, conversationHistory, userProfile);
   }
 };
 
@@ -161,7 +179,8 @@ const rankFromAverage = (average: number): EvaluationResult['rank'] => {
 const buildEvaluationPrompt = (
   characterId: string,
   scenarioId: string,
-  conversationHistory: ChatMessage[]
+  conversationHistory: ChatMessage[],
+  userProfile?: UserProfileForLlm
 ) => {
   const character = getCharacterById(characterId);
   const scenario = getScenarioById(scenarioId);
@@ -170,6 +189,7 @@ const buildEvaluationPrompt = (
     `相手: ${character?.name ?? ''} (${character?.role ?? ''})`,
     `シナリオ: ${scenario?.name ?? ''}`,
     `ミッション: ${scenario?.mission ?? ''}`,
+    `ユーザープロフィール: ${formatUserProfile(userProfile)}`,
     `成功条件: ${(scenario?.successCriteria ?? []).join(' / ')}`,
     'JSONのみで返してください。キーは empathy, questioning, distance, attractiveness, rank, feedback, strengths, improvements。',
     '各スコアは0から100、rankはS/A/B/C/D、strengthsとimprovementsは日本語文字列配列。',
@@ -180,7 +200,8 @@ const buildEvaluationPrompt = (
 export const evaluateWithFallback = (
   characterId: string,
   scenarioId: string,
-  conversationHistory: ChatMessage[]
+  conversationHistory: ChatMessage[],
+  userProfile?: UserProfileForLlm
 ): EvaluationResult => {
   const scenario = getScenarioById(scenarioId);
   const scores = scoreFromConversation(conversationHistory);
@@ -192,7 +213,7 @@ export const evaluateWithFallback = (
     ...scores,
     rank,
     feedback: hasConversation
-      ? `${scenario?.mission ?? '今回のミッション'}に対して、会話の量と質問の入れ方から評価しました。相手の発言に触れてから質問を返すと、さらに自然な流れになります。`
+      ? `${scenario?.mission ?? '今回のミッション'}に対して、${formatUserProfile(userProfile)}というプロフィールも踏まえて評価しました。相手の発言に触れてから質問を返すと、さらに自然な流れになります。`
       : 'まだユーザー発話が少ないため、まずは相手が返しやすい一言と質問を送ってみましょう。',
     strengths: [
       scores.questioning >= 60 ? '質問を使って会話を続けようとしている' : '会話を始める準備ができている',
@@ -208,14 +229,15 @@ export const evaluateWithFallback = (
 export const evaluateOnDevice = async (
   characterId: string,
   scenarioId: string,
-  conversationHistory: ChatMessage[]
+  conversationHistory: ChatMessage[],
+  userProfile?: UserProfileForLlm
 ): Promise<EvaluationResult> => {
   try {
     const context = await getNativeLlama();
     const result = await context.completion({
       messages: [
         { role: 'system', content: 'あなたは厳密なJSONだけを返す会話評価AIです。' },
-        { role: 'user', content: buildEvaluationPrompt(characterId, scenarioId, conversationHistory) },
+        { role: 'user', content: buildEvaluationPrompt(characterId, scenarioId, conversationHistory, userProfile) },
       ],
       n_predict: 360,
       temperature: 0.2,
@@ -236,7 +258,6 @@ export const evaluateOnDevice = async (
     };
   } catch (error) {
     console.warn('On-device evaluation fallback:', error);
-    return evaluateWithFallback(characterId, scenarioId, conversationHistory);
+    return evaluateWithFallback(characterId, scenarioId, conversationHistory, userProfile);
   }
 };
-

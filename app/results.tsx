@@ -47,7 +47,7 @@ export default function ResultsScreen() {
   }>();
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { messages } = useChatStore();
+  const { messages, userProfile } = useChatStore();
   const character = characterId ? getCharacterById(characterId) : null;
   // const { showInterstitialAd } = useInterstitialAd();
 
@@ -68,7 +68,8 @@ export default function ResultsScreen() {
         sessionId || '',
         characterId || '',
         scenarioId || '',
-        conversationHistory
+        conversationHistory,
+        userProfile
       );
 
       setEvaluation(result);
