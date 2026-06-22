@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Alert,
+  ImageBackground,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getCharacterById } from '@/src/data/characters';
 import { SCENARIOS } from '@/src/data/scenarios';
+import { characterImages } from '@/src/data/characterImages';
 import { sessionAPI } from '@/src/services/api';
 import { useChatStore } from '@/src/store/chatStore';
 
@@ -47,17 +49,21 @@ export default function CharacterDetailScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* キャラクター情報 */}
-        <View style={[styles.characterHeader, { backgroundColor: character.color }]}>
-          <Text style={styles.characterEmoji}>{character.emoji}</Text>
-          <Text style={styles.characterName}>{character.name}</Text>
-          <Text style={styles.characterAge}>{character.age}歳 • {character.role}</Text>
-          <Text style={styles.characterPersonality}>{character.personality}</Text>
-        </View>
+        <ImageBackground
+          source={characterImages[character.id as keyof typeof characterImages]}
+          style={styles.characterHero}
+          imageStyle={styles.characterHeroImage}
+        >
+          <View style={styles.heroOverlay}>
+            <Text style={styles.characterName}>{character.name}</Text>
+            <Text style={styles.characterAge}>{character.age}歳 • {character.role}</Text>
+            <Text style={styles.characterPersonality}>{character.personality}</Text>
+            <Text style={styles.characterDescription}>{character.description}</Text>
+          </View>
+        </ImageBackground>
 
-        {/* シナリオ選択 */}
         <View style={styles.scenariosSection}>
-          <Text style={styles.sectionTitle}>シナリオを選択</Text>
+          <Text style={styles.sectionTitle}>ミッションを選択</Text>
           {SCENARIOS.map((scenario) => (
             <TouchableOpacity
               key={scenario.id}
@@ -70,6 +76,13 @@ export default function CharacterDetailScreen() {
               <View style={styles.scenarioContent}>
                 <Text style={styles.scenarioName}>{scenario.name}</Text>
                 <Text style={styles.scenarioDescription}>{scenario.description}</Text>
+                <View style={styles.missionBox}>
+                  <Text style={styles.missionLabel}>MISSION</Text>
+                  <Text style={styles.missionText}>{scenario.mission}</Text>
+                  {scenario.successCriteria.map((criteria) => (
+                    <Text key={criteria} style={styles.criteriaText}>• {criteria}</Text>
+                  ))}
+                </View>
               </View>
               {selectedScenario === scenario.id && (
                 <Text style={styles.checkmark}>✓</Text>
@@ -113,36 +126,49 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 20,
   },
-  characterHeader: {
-    borderRadius: 16,
-    padding: 24,
+  characterHero: {
+    minHeight: 430,
     marginBottom: 24,
-    alignItems: 'center',
+    overflow: 'hidden',
+    borderRadius: 8,
+    justifyContent: 'flex-end',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  characterEmoji: {
-    fontSize: 48,
-    marginBottom: 12,
+  characterHeroImage: {
+    borderRadius: 8,
   },
   characterName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: 34,
+    fontWeight: '900',
+    color: '#FFFFFF',
     marginBottom: 4,
   },
   characterAge: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 16,
+    color: '#F7E7DD',
     marginBottom: 8,
+    fontWeight: '700',
   },
   characterPersonality: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    lineHeight: 20,
+  },
+  characterDescription: {
     fontSize: 13,
-    color: '#555',
-    fontStyle: 'italic',
+    color: '#EFE7E1',
+    lineHeight: 19,
+    marginTop: 8,
+  },
+  heroOverlay: {
+    paddingHorizontal: 22,
+    paddingTop: 96,
+    paddingBottom: 24,
+    backgroundColor: 'rgba(0,0,0,0.43)',
   },
   scenariosSection: {
     marginBottom: 24,
@@ -155,7 +181,7 @@ const styles = StyleSheet.create({
   },
   scenarioCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 16,
     marginBottom: 12,
     flexDirection: 'row',
@@ -180,6 +206,30 @@ const styles = StyleSheet.create({
   scenarioDescription: {
     fontSize: 12,
     color: '#666',
+    lineHeight: 18,
+  },
+  missionBox: {
+    marginTop: 12,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#F8F6F2',
+  },
+  missionLabel: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#E35C63',
+    marginBottom: 4,
+  },
+  missionText: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: '#333333',
+    marginBottom: 8,
+  },
+  criteriaText: {
+    fontSize: 12,
+    color: '#555555',
+    lineHeight: 18,
   },
   checkmark: {
     fontSize: 24,

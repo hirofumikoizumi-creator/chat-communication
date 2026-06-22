@@ -40,7 +40,11 @@ const getScoreColor = (score: number): string => {
 
 export default function ResultsScreen() {
   const router = useRouter();
-  const { sessionId, characterId } = useLocalSearchParams<{ sessionId: string; characterId: string }>();
+  const { sessionId, characterId, scenarioId } = useLocalSearchParams<{
+    sessionId: string;
+    characterId: string;
+    scenarioId?: string;
+  }>();
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { messages } = useChatStore();
@@ -63,7 +67,7 @@ export default function ResultsScreen() {
       const result = await chatAPI.evaluateSession(
         sessionId || '',
         characterId || '',
-        '', // scenarioId
+        scenarioId || '',
         conversationHistory
       );
 

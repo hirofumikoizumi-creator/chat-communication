@@ -62,8 +62,12 @@ export default function HistoryScreen() {
       <TouchableOpacity
         style={styles.sessionCard}
         onPress={() => router.push({
-          pathname: '/session-detail',
-          params: { sessionId: item.id },
+          pathname: '/results',
+          params: {
+            sessionId: item.id,
+            characterId: item.characterId,
+            scenarioId: item.scenarioId,
+          },
         })}
       >
         <View style={styles.sessionHeader}>

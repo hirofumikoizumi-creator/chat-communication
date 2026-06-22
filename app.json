@@ -47,11 +47,20 @@
           "ios_app_id": "ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyyyyyy",
           "android_app_id": "ca-app-pub-xxxxxxxxxxxxxxxx~yyyyyyyyyyyyyy"
         }
+      ],
+      [
+        "llama.rn",
+        {
+          "enableEntitlements": true,
+          "entitlementsProfile": "production",
+          "forceCxx20": true,
+          "enableOpenCLAndHexagon": true
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     }
   }
 }
