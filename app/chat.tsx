@@ -18,6 +18,7 @@ import { chatAPI } from '@/src/services/api';
 import { getCharacterById } from '@/src/data/characters';
 import { getScenarioById } from '@/src/data/scenarios';
 import { characterImages } from '@/src/data/characterImages';
+import { showEvaluationInterstitial } from '@/src/services/ads';
 // import { useBannerAd } from '@/src/hooks/useAds';
 
 export default function ChatScreen() {
@@ -25,6 +26,7 @@ export default function ChatScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const [inputText, setInputText] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
   // const { showBannerAd } = useBannerAd();
 
   const {
@@ -85,15 +87,22 @@ export default function ChatScreen() {
     }
   };
 
-  const handleFinishChat = () => {
-    router.push({
-      pathname: '/results',
-      params: {
-        sessionId,
-        characterId,
-        scenarioId,
-      },
-    });
+  const handleFinishChat = async () => {
+    if (isFinishing) return;
+    setIsFinishing(true);
+    try {
+      await showEvaluationInterstitial();
+    } finally {
+      setIsFinishing(false);
+      router.push({
+        pathname: '/results',
+        params: {
+          sessionId,
+          characterId,
+          scenarioId,
+        },
+      });
+    }
   };
 
   if (!character || !scenario) {
@@ -197,10 +206,13 @@ export default function ChatScreen() {
         </View>
 
         <TouchableOpacity
-          style={styles.finishButton}
+          style={[styles.finishButton, isFinishing && styles.finishButtonDisabled]}
           onPress={handleFinishChat}
+          disabled={isFinishing}
         >
-          <Text style={styles.finishButtonText}>会話を終了して評価を見る</Text>
+          <Text style={styles.finishButtonText}>
+            {isFinishing ? '評価を準備中...' : '会話を終了して評価を見る'}
+          </Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -441,6 +453,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#D94C5C',
+  },
+  finishButtonDisabled: {
+    opacity: 0.58,
   },
   finishButtonText: {
     fontSize: 14,
