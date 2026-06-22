@@ -195,7 +195,7 @@ export default function HomeScreen() {
           >
             <View style={styles.badges}>
               <Animated.View style={[styles.badge, styles.skipBadge, { opacity: skipOpacity }]}>
-                <Text style={styles.skipBadgeText}>SKIP</Text>
+                <Text style={styles.skipBadgeText}>NEXT</Text>
               </Animated.View>
               <Animated.View style={[styles.badge, styles.likeBadge, { opacity: likeOpacity }]}>
                 <Text style={styles.likeBadgeText}>LIKE</Text>
@@ -219,23 +219,23 @@ export default function HomeScreen() {
         <TouchableOpacity
           style={[styles.actionButton, styles.rewindButton]}
           onPress={rewindCard}
-          accessibilityLabel="戻る"
+          accessibilityLabel="前へ"
         >
-          <Text style={styles.rewindText}>↻</Text>
+          <Text style={styles.rewindText}>前へ</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, styles.skipButton]}
           onPress={skipCard}
-          accessibilityLabel="スキップ"
+          accessibilityLabel="次へ"
         >
-          <Text style={styles.skipText}>×</Text>
+          <Text style={styles.skipText}>次へ</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionButton, styles.likeButton]}
           onPress={chooseCard}
-          accessibilityLabel="選択"
+          accessibilityLabel="いいね"
         >
-          <Text style={styles.likeText}>♥</Text>
+          <Text style={styles.likeText}>いいね</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.72)',
   },
   skipBadge: {
-    borderColor: '#E25C5C',
+    borderColor: '#B68B31',
     transform: [{ rotate: '-12deg' }],
   },
   likeBadge: {
@@ -395,13 +395,13 @@ const styles = StyleSheet.create({
     transform: [{ rotate: '12deg' }],
   },
   skipBadgeText: {
-    color: '#D74646',
-    fontSize: 20,
+    color: '#9C7425',
+    fontSize: 18,
     fontWeight: '900',
   },
   likeBadgeText: {
     color: '#168F5F',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '900',
   },
   profileOverlay: {
@@ -459,36 +459,38 @@ const styles = StyleSheet.create({
     borderColor: '#E8DDD6',
   },
   rewindButton: {
-    width: 54,
+    width: 72,
     height: 54,
     borderRadius: 27,
   },
   skipButton: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    width: 82,
+    height: 62,
+    borderRadius: 31,
   },
   likeButton: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    width: 82,
+    height: 62,
+    borderRadius: 31,
     backgroundColor: '#FF5C8A',
     borderColor: '#FF5C8A',
   },
   rewindText: {
     color: '#B68B31',
-    fontSize: 27,
-    lineHeight: 30,
+    fontSize: 14,
+    lineHeight: 18,
+    fontWeight: '900',
   },
   skipText: {
-    color: '#E35C63',
-    fontSize: 40,
-    lineHeight: 42,
-    fontWeight: '300',
+    color: '#8F6F57',
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '900',
   },
   likeText: {
     color: '#FFFFFF',
-    fontSize: 35,
-    lineHeight: 38,
+    fontSize: 15,
+    lineHeight: 20,
+    fontWeight: '900',
   },
 }) as Record<string, any>;

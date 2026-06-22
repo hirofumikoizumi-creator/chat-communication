@@ -34,6 +34,8 @@ export default function CharacterDetailScreen() {
     );
   }
 
+  const characterImage = characterImages[character.id as keyof typeof characterImages];
+
   const handleStartChat = async (scenarioId: string) => {
     try {
       setIsLoading(true);
@@ -52,7 +54,7 @@ export default function CharacterDetailScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <ImageBackground
-          source={characterImages[character.id as keyof typeof characterImages]}
+          source={characterImage}
           style={styles.characterHero}
           imageStyle={styles.characterHeroImage}
         >
@@ -82,9 +84,6 @@ export default function CharacterDetailScreen() {
                 <View style={styles.missionBox}>
                   <Text style={styles.missionLabel}>MISSION</Text>
                   <Text style={styles.missionText}>{scenario.mission}</Text>
-                  {scenario.successCriteria.map((criteria) => (
-                    <Text key={criteria} style={styles.criteriaText}>• {criteria}</Text>
-                  ))}
                 </View>
               </View>
               {selectedScenario === scenario.id && (
@@ -234,11 +233,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#333333',
     marginBottom: 8,
-  },
-  criteriaText: {
-    fontSize: 12,
-    color: '#555555',
-    lineHeight: 18,
   },
   checkmark: {
     fontSize: 24,
