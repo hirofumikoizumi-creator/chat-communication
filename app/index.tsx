@@ -121,7 +121,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.topBar}>
-        <View>
+        <View style={styles.brandBlock}>
           <Text style={styles.brand}>Chat Match</Text>
           <Text style={styles.caption}>AI会話トレーナー</Text>
         </View>
@@ -252,9 +252,11 @@ const styles = StyleSheet.create({
     minHeight: 70,
     paddingTop: 12,
     paddingBottom: 10,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+  },
+  brandBlock: {
+    alignItems: 'center',
   },
   brand: {
     color: '#222222',
@@ -267,6 +269,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   historyButton: {
+    position: 'absolute',
+    right: 0,
+    top: 12,
     width: 46,
     height: 46,
     borderRadius: 23,
