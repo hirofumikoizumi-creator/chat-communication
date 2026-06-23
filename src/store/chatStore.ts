@@ -7,15 +7,23 @@ export interface Message {
   timestamp: number;
 }
 
+export interface UserProfile {
+  name: string;
+  age: string;
+  job: string;
+}
+
 export interface ChatState {
   sessionId: string | null;
   characterId: string | null;
   scenarioId: string | null;
+  userProfile: UserProfile;
   messages: Message[];
   isLoading: boolean;
   error: string | null;
 
   // Actions
+  setUserProfile: (profile: Partial<UserProfile>) => void;
   initializeSession: (sessionId: string, characterId: string, scenarioId: string) => void;
   addMessage: (role: 'user' | 'assistant', content: string) => void;
   setLoading: (loading: boolean) => void;
@@ -27,9 +35,22 @@ export const useChatStore = create<ChatState>((set) => ({
   sessionId: null,
   characterId: null,
   scenarioId: null,
+  userProfile: {
+    name: '',
+    age: '',
+    job: '',
+  },
   messages: [],
   isLoading: false,
   error: null,
+
+  setUserProfile: (profile) =>
+    set((state) => ({
+      userProfile: {
+        ...state.userProfile,
+        ...profile,
+      },
+    })),
 
   initializeSession: (sessionId, characterId, scenarioId) =>
     set({

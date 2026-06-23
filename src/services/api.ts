@@ -1,13 +1,4 @@
-import axios, { AxiosError } from 'axios';
-
-const API_BASE_URL = 'https://matchaiai-iizcntga.manus.space/api/trpc';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+import { evaluateOnDevice, generateOnDeviceReply } from '@/src/services/onDeviceLlm';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -25,22 +16,26 @@ export interface EvaluationResult {
   improvements: string[];
 }
 
+export interface UserProfileForLlm {
+  name?: string;
+  age?: string;
+  job?: string;
+}
+
 export interface ApiError {
   message: string;
   code?: string;
 }
 
-const handleError = (error: unknown): ApiError => {
-  if (axios.isAxiosError(error)) {
-    return {
-      message: error.response?.data?.message || error.message || 'API エラーが発生しました',
-      code: error.code,
-    };
-  }
-  return {
-    message: error instanceof Error ? error.message : '不明なエラーが発生しました',
-  };
+type LocalSession = {
+  id: string;
+  characterId: string;
+  scenarioId: string;
+  createdAt: string;
+  evaluation?: EvaluationResult;
 };
+
+const sessions = new Map<string, LocalSession>();
 
 export const chatAPI = {
   async sendMessage(
@@ -48,81 +43,45 @@ export const chatAPI = {
     characterId: string,
     scenarioId: string,
     userMessage: string,
-    conversationHistory: ChatMessage[]
+    conversationHistory: ChatMessage[],
+    userProfile?: UserProfileForLlm
   ): Promise<string> {
-    try {
-      const response = await api.post('/chat.sendMessage', {
-        sessionId,
-        characterId,
-        scenarioId,
-        userMessage,
-        conversationHistory,
-      });
-      return response.data.result.data;
-    } catch (error) {
-      const apiError = handleError(error);
-      console.error('Chat API error:', apiError);
-      throw apiError;
-    }
+    return generateOnDeviceReply(characterId, scenarioId, userMessage, conversationHistory, userProfile);
   },
 
   async evaluateSession(
     sessionId: string,
     characterId: string,
     scenarioId: string,
-    conversationHistory: ChatMessage[]
+    conversationHistory: ChatMessage[],
+    userProfile?: UserProfileForLlm
   ): Promise<EvaluationResult> {
-    try {
-      const response = await api.post('/chat.evaluateSession', {
-        sessionId,
-        characterId,
-        scenarioId,
-        conversationHistory,
-      });
-      return response.data.result.data;
-    } catch (error) {
-      const apiError = handleError(error);
-      console.error('Evaluation API error:', apiError);
-      throw apiError;
+    const evaluation = await evaluateOnDevice(characterId, scenarioId, conversationHistory, userProfile);
+    const session = sessions.get(sessionId);
+    if (session) {
+      session.evaluation = evaluation;
     }
+    return evaluation;
   },
 };
 
 export const sessionAPI = {
   async createSession(characterId: string, scenarioId: string): Promise<string> {
-    try {
-      const response = await api.post('/session.create', {
-        characterId,
-        scenarioId,
-      });
-      return response.data.result.data.id;
-    } catch (error) {
-      const apiError = handleError(error);
-      console.error('Session create error:', apiError);
-      throw apiError;
-    }
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    sessions.set(id, {
+      id,
+      characterId,
+      scenarioId,
+      createdAt: new Date().toISOString(),
+    });
+    return id;
   },
 
-  async getSessions(): Promise<any[]> {
-    try {
-      const response = await api.post('/session.list', {});
-      return response.data.result.data || [];
-    } catch (error) {
-      const apiError = handleError(error);
-      console.error('Session list error:', apiError);
-      // ネットワークエラーの場合は空配列を返す
-      return [];
-    }
+  async getSessions(): Promise<LocalSession[]> {
+    return Array.from(sessions.values()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   },
 
-  async getSessionById(sessionId: string): Promise<any> {
-    try {
-      const response = await api.post('/session.getById', { sessionId });
-      return response.data.result.data;
-    } catch (error) {
-      const apiError = handleError(error);
-      console.error('Session get error:', apiError);
-      throw apiError;
-    }
+  async getSessionById(sessionId: string): Promise<LocalSession | null> {
+    return sessions.get(sessionId) || null;
   },
 };

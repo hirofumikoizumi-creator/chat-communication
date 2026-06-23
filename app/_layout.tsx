@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Stack, Platform } from 'expo-router';
+import { Stack } from 'expo-router';
+import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 
@@ -23,7 +24,6 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          animationEnabled: true,
         }}
       >
         <Stack.Screen name="index" options={{ title: 'ホーム' }} />
