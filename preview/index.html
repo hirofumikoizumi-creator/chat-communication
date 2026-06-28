@@ -6,11 +6,12 @@
     <title>Chat Match</title>
     <style>
       :root {
-        --bg: #fff7f2;
+        --bg: #fff6f4;
         --ink: #251d22;
         --muted: #78666e;
         --coral: #ff5f7e;
         --rose: #ff8aa2;
+        --violet: #8a6cff;
         --teal: #2bb8a8;
         --card: #fff;
         --line: rgb(37 29 34 / 10%);
@@ -20,7 +21,14 @@
       }
 
       * { box-sizing: border-box; }
-      body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 20% 0%, #ffe0e8, transparent 32%), var(--bg); }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 10% -10%, #ffd5df 0 22%, transparent 36%),
+          radial-gradient(circle at 110% 20%, #d9fff8 0 18%, transparent 34%),
+          linear-gradient(135deg, #fffaf7, #fff0f5 52%, #f2fffc);
+      }
       button, textarea { font: inherit; }
       button { cursor: pointer; }
 
@@ -28,8 +36,10 @@
         width: min(100%, 480px);
         min-height: 100vh;
         margin: 0 auto;
-        background: linear-gradient(#fffaf7, #fff1f4);
-        box-shadow: 0 0 50px rgb(37 29 34 / 10%);
+        background:
+          linear-gradient(180deg, rgb(255 255 255 / 82%), rgb(255 244 247 / 88%)),
+          radial-gradient(circle at 50% 0%, #fff, transparent 45%);
+        box-shadow: 0 0 70px rgb(37 29 34 / 14%);
       }
 
       .screen { display: none; min-height: 100vh; padding: 18px 16px 26px; }
@@ -74,6 +84,22 @@
         border-radius: 999px;
         background: rgb(255 255 255 / 76%);
         color: var(--ink);
+        font-weight: 900;
+        box-shadow: 0 10px 22px rgb(37 29 34 / 8%);
+      }
+
+      .history-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-height: 42px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgb(255 255 255 / 78%);
+        color: var(--ink);
+        font-weight: 900;
+        box-shadow: 0 10px 22px rgb(37 29 34 / 8%);
       }
 
       .subcopy {
@@ -83,16 +109,80 @@
         line-height: 1.45;
       }
 
+      .user-profile {
+        margin-bottom: 16px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgb(255 255 255 / 90%), rgb(255 250 247 / 82%));
+        box-shadow: 0 16px 32px rgb(37 29 34 / 8%);
+      }
+
+      .profile-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .profile-head strong {
+        font-size: 15px;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field:first-child {
+        grid-column: 1 / -1;
+      }
+
+      .field label {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .field input,
+      .field select {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fffaf7;
+        color: var(--ink);
+        padding: 0 12px;
+      }
+
+      .profile-note {
+        margin: 9px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
       .deck {
         position: relative;
-        height: min(68vh, 620px);
-        min-height: 500px;
-        margin: 0 0 16px;
+        height: min(64vh, 590px);
+        min-height: 470px;
+        margin: 0 0 18px;
+        isolation: isolate;
       }
 
       .match-card {
         position: absolute;
-        inset: 0;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: calc(100% - 34px);
         overflow: hidden;
         border: 0;
         border-radius: 28px;
@@ -100,13 +190,51 @@
         text-align: left;
         color: #fff;
         background: #ddd;
-        box-shadow: 0 22px 45px rgb(37 29 34 / 18%);
+        box-shadow: 0 28px 54px rgb(37 29 34 / 20%);
         transition: transform 220ms ease, opacity 220ms ease;
         touch-action: pan-y;
       }
 
-      .match-card:nth-child(2) { transform: translateY(12px) scale(.97); opacity: .72; }
-      .match-card:nth-child(3) { transform: translateY(24px) scale(.94); opacity: .42; }
+      .match-card.next {
+        top: auto;
+        bottom: 12px;
+        left: 18px;
+        right: 18px;
+        height: 72px;
+        border-radius: 22px;
+        opacity: .72;
+        pointer-events: none;
+        filter: saturate(.85);
+        z-index: -1;
+      }
+
+      .match-card.next .photo {
+        filter: blur(1px);
+      }
+
+      .match-card.next .card-info {
+        display: none;
+      }
+
+      .match-card.peek {
+        top: auto;
+        bottom: 0;
+        left: 36px;
+        right: 36px;
+        height: 54px;
+        border-radius: 20px;
+        opacity: .34;
+        pointer-events: none;
+        z-index: -2;
+      }
+
+      .match-card.peek .photo {
+        filter: blur(2px);
+      }
+
+      .match-card.peek .card-info {
+        display: none;
+      }
 
       .photo {
         position: absolute;
@@ -145,31 +273,48 @@
 
       .actions {
         display: grid;
-        grid-template-columns: 64px 1fr 64px;
+        grid-template-columns: 1fr 78px 1fr;
         gap: 12px;
         align-items: center;
       }
 
-      .pass, .like {
-        height: 64px;
+      .nav-action,
+      .like {
+        display: grid;
+        place-items: center;
+        height: 62px;
         border: 0;
         border-radius: 999px;
         background: #fff;
-        font-size: 27px;
-        box-shadow: 0 12px 26px rgb(37 29 34 / 12%);
+        color: var(--ink);
+        font-size: 26px;
+        font-weight: 900;
+        box-shadow: 0 14px 28px rgb(37 29 34 / 12%);
       }
 
-      .like { color: var(--coral); }
-      .pass { color: #7c8592; }
+      .nav-action {
+        position: relative;
+        color: #5f5862;
+      }
 
-      .history {
-        height: 54px;
-        border: 0;
-        border-radius: 999px;
-        color: #fff;
+      .nav-action::after {
+        position: absolute;
+        bottom: -21px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--muted);
+        content: attr(aria-label);
+        font-size: 11px;
         font-weight: 900;
-        background: linear-gradient(135deg, var(--coral), #9d6cff);
-        box-shadow: 0 12px 26px rgb(255 95 126 / 22%);
+        white-space: nowrap;
+      }
+
+      .like {
+        height: 78px;
+        color: #fff;
+        font-size: 32px;
+        background: linear-gradient(135deg, var(--coral), var(--violet));
+        box-shadow: 0 18px 34px rgb(255 95 126 / 28%);
       }
 
       .hero-photo {
@@ -206,10 +351,12 @@
         position: relative;
         min-height: 150px;
         overflow: hidden;
+        border: 0;
         border-radius: 18px;
-        background-image: var(--sheet);
-        background-size: 580% 230%;
+        background-image: var(--subimage);
+        background-size: 200% 200%;
         background-position: var(--subpos);
+        box-shadow: 0 12px 24px rgb(37 29 34 / 10%);
       }
 
       .subphoto::after {
@@ -225,12 +372,55 @@
         font-weight: 800;
       }
 
+      .photo-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: none;
+        place-items: center;
+        padding: 18px;
+        background: rgb(16 12 18 / 74%);
+        backdrop-filter: blur(14px);
+      }
+
+      .photo-modal.active {
+        display: grid;
+      }
+
+      .modal-card {
+        position: relative;
+        width: min(100%, 430px);
+        aspect-ratio: 4 / 5;
+        overflow: hidden;
+        border-radius: 28px;
+        background-image: var(--modalimage);
+        background-size: 200% 200%;
+        background-position: var(--modalpos);
+        box-shadow: 0 30px 70px rgb(0 0 0 / 38%);
+      }
+
+      .modal-close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        z-index: 1;
+        width: 44px;
+        height: 44px;
+        border: 0;
+        border-radius: 999px;
+        background: rgb(255 255 255 / 86%);
+        color: var(--ink);
+        font-size: 24px;
+        font-weight: 900;
+      }
+
       .panel {
         margin-bottom: 14px;
         padding: 16px;
         border: 1px solid var(--line);
         border-radius: 20px;
-        background: rgb(255 255 255 / 78%);
+        background: linear-gradient(180deg, rgb(255 255 255 / 90%), rgb(255 250 247 / 78%));
+        box-shadow: 0 12px 24px rgb(37 29 34 / 6%);
       }
 
       .scenario {
@@ -255,7 +445,8 @@
         border-radius: 999px;
         color: #fff;
         font-weight: 900;
-        background: linear-gradient(135deg, var(--coral), var(--rose));
+        background: linear-gradient(135deg, var(--coral), var(--violet));
+        box-shadow: 0 14px 30px rgb(255 95 126 / 22%);
       }
 
       .primary:disabled { opacity: .45; cursor: default; }
@@ -321,18 +512,39 @@
     </style>
   </head>
   <body>
-    <main class="app" style="--sheet: url('assets/chat-match-characters-18-35.png')">
+    <main class="app" style="--sheet: url('assets/chat-match-characters-18-35.png?v=3')">
       <section id="home" class="screen active">
         <div class="brandbar">
           <div class="logo"><span class="logo-mark">♡</span>Chat Match</div>
-          <button class="icon-btn" onclick="showHistory()">⌘</button>
+          <button class="history-pill" onclick="showHistory()">履歴</button>
         </div>
         <p class="subcopy">スワイプして相手を選び、いいねで会話練習へ。全キャラクターは18〜35歳です。</p>
+        <div class="user-profile">
+          <div class="profile-head">
+            <strong>あなたのプロフィール</strong>
+            <span class="muted" id="profileStatus">未設定</span>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="userName">呼び名</label>
+              <input id="userName" maxlength="20" placeholder="例: ひろ" oninput="saveUserProfile()" />
+            </div>
+            <div class="field">
+              <label for="userJob">職業</label>
+              <select id="userJob" onchange="saveUserProfile()"></select>
+            </div>
+            <div class="field">
+              <label for="userAge">年齢</label>
+              <select id="userAge" onchange="saveUserProfile()"></select>
+            </div>
+          </div>
+          <p class="profile-note">保存した内容は、後ほど各キャラクターがあなたを理解して会話するための情報として使います。</p>
+        </div>
         <div id="deck" class="deck"></div>
         <div class="actions">
-          <button class="pass" onclick="passCard()">×</button>
-          <button class="history" onclick="showHistory()">会話履歴</button>
+          <button class="nav-action" aria-label="戻る" onclick="prevCard()">‹</button>
           <button class="like" onclick="likeCard()">♡</button>
+          <button class="nav-action" aria-label="次へ" onclick="nextCard()">›</button>
         </div>
       </section>
 
@@ -382,21 +594,62 @@
         </div>
         <div id="historyList"></div>
       </section>
+      <div id="photoModal" class="photo-modal" onclick="closePhotoModal()">
+        <div id="modalCard" class="modal-card" onclick="event.stopPropagation()">
+          <button class="modal-close" onclick="closePhotoModal()">×</button>
+        </div>
+      </div>
     </main>
 
     <script>
       const STORAGE_KEY = "chat-match.sessions.v2";
+      const USER_PROFILE_KEY = "chat-match.user-profile.v1";
+      const jobOptions = [
+        "未選択",
+        "会社員",
+        "経営者",
+        "役員",
+        "自営業",
+        "フリーランス",
+        "営業",
+        "企画・マーケティング",
+        "コンサルタント",
+        "エンジニア",
+        "デザイナー",
+        "クリエイター",
+        "事務・管理",
+        "人事・広報",
+        "金融・保険",
+        "不動産",
+        "医師",
+        "看護師",
+        "医療・福祉",
+        "薬剤師",
+        "教育",
+        "公務員",
+        "法律・会計",
+        "研究職",
+        "美容・アパレル",
+        "飲食・サービス",
+        "建築・土木",
+        "製造・メーカー",
+        "運輸・物流",
+        "学生",
+        "家事手伝い",
+        "その他",
+      ];
+      const ageOptions = ["未選択", ...Array.from({ length: 53 }, (_, index) => String(index + 18))];
       const characters = [
-        { id: "aoi", name: "葵", age: 18, role: "美大生", pos: "0% 0%", bio: "絵と古着屋めぐりが好き。最初は少し緊張するけれど、丁寧な言葉に弱いタイプ。", tags: ["art", "vintage", "shy"] },
-        { id: "riko", name: "莉子", age: 20, role: "服飾学生", pos: "25% 0%", bio: "流行に敏感で写真好き。軽いノリより、センスのある一言に反応しやすい。", tags: ["fashion", "camera", "trend"] },
-        { id: "mio", name: "美緒", age: 22, role: "カフェバリスタ", pos: "50% 0%", bio: "聞き上手で穏やか。日常の小さな話題を広げる会話が得意。", tags: ["coffee", "calm", "music"] },
-        { id: "hina", name: "陽菜", age: 24, role: "歯科衛生士", pos: "75% 0%", bio: "清潔感と誠実さを重視。急な距離詰めより、安心できる会話が好き。", tags: ["health", "clean", "kind"] },
-        { id: "yuna", name: "結菜", age: 25, role: "看護師", pos: "100% 0%", bio: "忙しい毎日の中でも明るい。ねぎらいと自然な質問に好印象を持つ。", tags: ["nurse", "bright", "care"] },
-        { id: "sara", name: "紗良", age: 27, role: "プロダクトデザイナー", pos: "0% 100%", bio: "ものづくりと展示会が好き。具体的で知的な会話に惹かれやすい。", tags: ["design", "gallery", "smart"] },
-        { id: "eri", name: "絵里", age: 28, role: "マーケター", pos: "25% 100%", bio: "仕事も遊びもテンポ良く楽しむタイプ。軽やかで前向きな話題が合う。", tags: ["marketing", "city", "active"] },
-        { id: "mai", name: "舞", age: 30, role: "小学校教員", pos: "50% 100%", bio: "優しく面倒見がいい。言葉選びの丁寧さや価値観の近さを大切にする。", tags: ["teacher", "warm", "books"] },
-        { id: "kaori", name: "香織", age: 32, role: "スタートアップ創業者", pos: "75% 100%", bio: "自立していて行動的。尊重し合える会話と、相手の芯の強さを見る。", tags: ["founder", "drive", "wine"] },
-        { id: "natsuki", name: "夏希", age: 35, role: "ヨガインストラクター", pos: "100% 100%", bio: "自然体で落ち着いた雰囲気。無理のない距離感とポジティブさを好む。", tags: ["yoga", "wellness", "nature"] },
+        { id: "aoi", name: "葵", age: 18, role: "女子高生", pos: "0% 0%", subImage: "sub-aoi.png", bio: "高校3年生です。写真とカフェが好きで、やさしく話しかけてもらえるとうれしいです。", longBio: "高校3年生の葵です。放課後は友だちとカフェに行ったり、空や街の写真を撮ったりしています。最初は少し人見知りするけど、ゆっくり話してくれる人だと安心します。いきなり距離が近すぎるより、学校のことや好きな音楽の話から自然に仲良くなれたらうれしいです。", tags: ["school", "photo", "shy"] },
+        { id: "riko", name: "莉子", age: 20, role: "服飾学生", pos: "25% 0%", subImage: "sub-riko.png", bio: "服飾学生です。古着と街歩きが好き。好きなものの話で盛り上がれる人がいいです。", longBio: "服飾の学校に通っている莉子です。休日は古着屋を回ったり、かわいいカフェやギャラリーを見つけたりしています。流行の話も好きだけど、ちゃんと自分の好きなものを持っている人に惹かれます。軽すぎるノリより、少しセンスのある一言をくれる人だと返信したくなります。", tags: ["fashion", "street", "trend"] },
+        { id: "mio", name: "美緒", age: 22, role: "カフェバリスタ", pos: "50% 0%", subImage: "sub-mio.png", bio: "カフェで働いています。音楽と散歩が好きで、ゆっくり会話できる人と合います。", longBio: "カフェでバリスタをしています、美緒です。コーヒーを淹れる時間と、帰り道に音楽を聴きながら歩く時間が好きです。派手な会話より、日常の小さなことを一緒に楽しめる人だとうれしいです。質問ばかりじゃなくて、あなたのことも少しずつ聞かせてくれると話しやすいです。", tags: ["coffee", "calm", "music"] },
+        { id: "hina", name: "陽菜", age: 24, role: "歯科衛生士", pos: "75% 0%", subImage: "sub-hina.png", bio: "歯科衛生士です。清潔感と誠実さを大事にしています。自然に話せる人が好きです。", longBio: "歯科衛生士をしている陽菜です。仕事柄、清潔感や丁寧な言葉づかいはけっこう見てしまいます。休みの日は映画を観たり、友だちとごはんに行ったりすることが多いです。急に距離を詰められるより、何気ないやりとりを重ねながら少しずつ仲良くなれる人が理想です。", tags: ["health", "clean", "kind"] },
+        { id: "yuna", name: "結菜", age: 25, role: "看護師", pos: "100% 0%", subImage: "sub-yuna.png", bio: "看護師です。忙しい日も多いけど、明るく笑える時間を大切にしています。", longBio: "看護師の結菜です。シフトで生活リズムが不規則なこともありますが、休みの日はおいしいものを食べたり、体を動かしたりしてリセットしています。忙しさをわかってくれる人や、ちょっとした一言で気づかってくれる人に惹かれます。明るく前向きな会話ができたらうれしいです。", tags: ["nurse", "bright", "care"] },
+        { id: "sara", name: "紗良", age: 27, role: "プロダクトデザイナー", pos: "0% 100%", subImage: "sub-sara.png", bio: "デザイナーです。展示会やインテリアが好き。考えていることを言葉にしてくれる人が好きです。", longBio: "プロダクトデザイナーの紗良です。休日は展示会やインテリアショップを見に行くことが多いです。見た目だけじゃなくて、なぜそれが好きなのかを話せる人に魅力を感じます。短い返事だけより、考えていることを少し言葉にしてくれる人だと、会話を続けたいなと思います。", tags: ["design", "gallery", "smart"] },
+        { id: "eri", name: "絵里", age: 28, role: "マーケター", pos: "25% 100%", subImage: "sub-eri.png", bio: "マーケターです。新しいお店探しや旅行計画が好き。テンポよく話せる人と合います。", longBio: "マーケティングの仕事をしている絵里です。新しいお店を見つけたり、週末の予定を考えたりするのが好きです。仕事の話もするけど、ずっと真面目すぎるより、軽やかに笑える会話が理想です。返信のテンポが合う人、前向きな提案をしてくれる人とは自然に距離が縮まりやすいです。", tags: ["marketing", "city", "active"] },
+        { id: "mai", name: "舞", age: 30, role: "小学校教員", pos: "50% 100%", subImage: "sub-mai.png", bio: "小学校の先生です。本と映画、静かなカフェが好き。丁寧に話せる人がうれしいです。", longBio: "小学校で先生をしている舞です。平日はにぎやかな毎日なので、休みの日は本を読んだり映画を観たり、静かなカフェで過ごすのが好きです。相手の話をちゃんと聞ける人、言葉を雑に扱わない人に安心します。楽しいだけじゃなく、価値観も少しずつ知っていける会話ができたらうれしいです。", tags: ["teacher", "warm", "books"] },
+        { id: "kaori", name: "香織", age: 32, role: "スタートアップ創業者", pos: "75% 100%", subImage: "sub-kaori.png", bio: "会社を経営しています。仕事も好きだけど、オフはごはんとワインでゆっくりしたい派です。", longBio: "小さな会社を経営している香織です。仕事は好きで毎日忙しいですが、オフの日はおいしいごはんとワインでゆっくり過ごしたいです。自立している人は好きですが、強がり合う関係より、お互いを尊重して自然に支え合える関係が理想です。会話では、相手の芯の強さや思いやりを見ています。", tags: ["founder", "drive", "wine"] },
+        { id: "natsuki", name: "夏希", age: 35, role: "ヨガインストラクター", pos: "100% 100%", subImage: "sub-natsuki.png", bio: "ヨガインストラクターです。自然と朝の散歩が好き。無理せず自然体で話したいです。", longBio: "ヨガインストラクターの夏希です。朝の散歩、自然のある場所、体にやさしいごはんが好きです。にぎやかな場所も楽しいけれど、落ち着いて深い話ができる時間も大切にしています。無理にかっこつけるより、自然体で思いやりのある人に惹かれます。お互いのペースを大事にできたらうれしいです。", tags: ["yoga", "wellness", "nature"] },
       ];
       const scenarios = [
         { id: "first_message", name: "初回メッセージ", description: "マッチ後の第一声。相手への興味と清潔感が大切です。" },
@@ -407,6 +660,8 @@
 
       const getSessions = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
       const setSessions = (sessions) => localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+      const getUserProfile = () => JSON.parse(localStorage.getItem(USER_PROFILE_KEY) || "{\"name\":\"\",\"job\":\"\",\"age\":\"\"}");
+      const setUserProfile = (profile) => localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profile));
       const byId = (items, id) => items.find((item) => item.id === id);
       const current = () => characters[state.index % characters.length];
 
@@ -417,8 +672,8 @@
 
       function renderDeck() {
         const cards = [0, 1, 2].map((offset) => characters[(state.index + offset) % characters.length]);
-        document.getElementById("deck").innerHTML = cards.map((character) => `
-          <button class="match-card" style="--pos:${character.pos}" onclick="openProfile('${character.id}')">
+        document.getElementById("deck").innerHTML = cards.map((character, offset) => `
+          <button class="match-card ${offset === 1 ? "next" : ""} ${offset === 2 ? "peek" : ""}" style="--pos:${character.pos}" onclick="openProfile('${character.id}')">
             <div class="photo"></div>
             <div class="card-info">
               <div class="name-line"><strong>${character.name}</strong><span>${character.age}</span></div>
@@ -429,7 +684,47 @@
         `).join("");
       }
 
-      function passCard() { state.index = (state.index + 1) % characters.length; renderDeck(); }
+      function renderUserProfileForm() {
+        const profile = getUserProfile();
+        document.getElementById("userJob").innerHTML = jobOptions.map((job) => {
+          const value = job === "未選択" ? "" : job;
+          return `<option value="${value}">${job}</option>`;
+        }).join("");
+        document.getElementById("userAge").innerHTML = ageOptions.map((age) => {
+          const value = age === "未選択" ? "" : age;
+          return `<option value="${value}">${age}${value ? "歳" : ""}</option>`;
+        }).join("");
+        document.getElementById("userName").value = profile.name || "";
+        document.getElementById("userJob").value = profile.job || "";
+        document.getElementById("userAge").value = profile.age || "";
+        updateProfileStatus(profile);
+      }
+
+      function saveUserProfile() {
+        const profile = {
+          name: document.getElementById("userName").value.trim(),
+          job: document.getElementById("userJob").value,
+          age: document.getElementById("userAge").value,
+        };
+        setUserProfile(profile);
+        updateProfileStatus(profile);
+      }
+
+      function updateProfileStatus(profile) {
+        const completed = [profile.name, profile.job, profile.age].filter(Boolean).length;
+        document.getElementById("profileStatus").textContent = completed === 3 ? "保存済み" : `${completed}/3`;
+      }
+
+      function userProfileText() {
+        const profile = getUserProfile();
+        const name = profile.name || "あなた";
+        const job = profile.job ? `${profile.job}` : "職業未設定";
+        const age = profile.age ? `${profile.age}歳` : "年齢未設定";
+        return `${name}さん（${age}・${job}）`;
+      }
+
+      function prevCard() { state.index = (state.index - 1 + characters.length) % characters.length; renderDeck(); }
+      function nextCard() { state.index = (state.index + 1) % characters.length; renderDeck(); }
       function likeCard() { openProfile(current().id); }
 
       function openProfile(id) {
@@ -444,19 +739,29 @@
           </div>
         `;
         document.getElementById("gallery").innerHTML = ["日常", "仕事", "休日", "好きな場所"].map((label, index) => `
-          <div class="subphoto" data-label="${label}" style="--subpos:${subPosition(character, index)}"></div>
+          <button class="subphoto" data-label="${label}" style="--subimage:url('assets/${character.subImage}?v=1'); --subpos:${subPosition(index)}" onclick="openPhotoModal('${character.subImage}', '${subPosition(index)}')"></button>
         `).join("");
-        document.getElementById("profileBio").textContent = character.bio;
+        document.getElementById("profileBio").textContent = character.longBio;
         renderScenarios();
         showScreen("detail");
       }
 
-      function subPosition(character, index) {
-        const base = character.pos.split(" ");
-        const x = parseFloat(base[0]);
-        const y = parseFloat(base[1]);
-        const shift = [-8, 7, -3, 5][index];
-        return `${Math.max(0, Math.min(100, x + shift))}% ${Math.max(0, Math.min(100, y + (index % 2 ? -8 : 8)))}%`;
+      function subPosition(index) {
+        const x = (index % 2) * 100;
+        const y = Math.floor(index / 2) * 100;
+        return `${x}% ${y}%`;
+      }
+
+      function openPhotoModal(image, position) {
+        const modal = document.getElementById("photoModal");
+        const card = document.getElementById("modalCard");
+        card.style.setProperty("--modalimage", `url('assets/${image}?v=1')`);
+        card.style.setProperty("--modalpos", position);
+        modal.classList.add("active");
+      }
+
+      function closePhotoModal() {
+        document.getElementById("photoModal").classList.remove("active");
       }
 
       function renderScenarios() {
@@ -475,7 +780,7 @@
         state.sessionId = `anon-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
         state.messages = [];
         const sessions = getSessions();
-        sessions.unshift({ id: state.sessionId, characterId: state.characterId, scenarioId: state.scenarioId, createdAt: now, updatedAt: now, messages: [] });
+        sessions.unshift({ id: state.sessionId, characterId: state.characterId, scenarioId: state.scenarioId, userProfile: getUserProfile(), createdAt: now, updatedAt: now, messages: [] });
         setSessions(sessions);
         renderChat();
         showScreen("chat");
@@ -495,13 +800,14 @@
 
       function reply(text) {
         const character = byId(characters, state.characterId);
+        const user = userProfileText();
         if (state.scenarioId === "date_invite") return text.includes("？") || text.includes("?")
-          ? `誘ってくれてありがとう。${character.name}としては、具体的で安心できる誘い方だと前向きになりやすいです。`
-          : "ありがとう。場所や時間がもう少し見えると、安心して返事しやすいかも。";
+          ? `誘ってくれてありがとう。${user}のことも少しわかっているので、具体的で安心できる誘い方だと前向きになりやすいです。`
+          : `${user}からのお誘い、うれしいです。場所や時間がもう少し見えると、安心して返事しやすいかも。`;
         if (state.scenarioId === "continue_chat") return text.length > 24
-          ? "ちゃんと話を広げようとしてくれているのが伝わります。もう少しあなたの感想も聞きたいです。"
-          : "いいですね。そこからもう一歩、質問か自分の話を足すと自然に続きそう。";
-        return "メッセージありがとう。最初の一言に相手への興味が入っていて、返信しやすい雰囲気です。";
+          ? `${user}らしさも少し見えて、ちゃんと話を広げようとしてくれているのが伝わります。もう少しあなたの感想も聞きたいです。`
+          : `${user}なんですね。そこからもう一歩、質問か自分の話を足すと自然に続きそう。`;
+        return `メッセージありがとう。${user}からの最初の一言として、相手への興味が入っていて返信しやすい雰囲気です。`;
       }
 
       function saveCurrentSession(evaluation) {
@@ -509,6 +815,7 @@
         const session = sessions.find((item) => item.id === state.sessionId);
         if (!session) return;
         session.messages = state.messages;
+        session.userProfile = getUserProfile();
         session.updatedAt = new Date().toISOString();
         if (evaluation) session.evaluation = evaluation;
         setSessions(sessions);
@@ -573,6 +880,7 @@
         showScreen("results");
       }
 
+      renderUserProfileForm();
       renderDeck();
     </script>
   </body>
