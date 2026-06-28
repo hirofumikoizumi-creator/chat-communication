@@ -11,7 +11,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useChatStore } from '@/src/store/chatStore';
 import { chatAPI, EvaluationResult } from '@/src/services/api';
-import { getCharacterById } from '@/src/data/characters';
+import { localSessionStore } from '@/src/services/localSessionStore';
 // import { useInterstitialAd } from '@/src/hooks/useAds';
 
 const getRankColor = (rank: string): string => {
@@ -40,11 +40,14 @@ const getScoreColor = (score: number): string => {
 
 export default function ResultsScreen() {
   const router = useRouter();
-  const { sessionId, characterId } = useLocalSearchParams<{ sessionId: string; characterId: string }>();
+  const { sessionId, characterId, scenarioId } = useLocalSearchParams<{
+    sessionId: string;
+    characterId: string;
+    scenarioId: string;
+  }>();
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { messages } = useChatStore();
-  const character = characterId ? getCharacterById(characterId) : null;
+  const { messages, scenarioId: storedScenarioId } = useChatStore();
   // const { showInterstitialAd } = useInterstitialAd();
 
   useEffect(() => {
@@ -55,19 +58,32 @@ export default function ResultsScreen() {
   const fetchEvaluation = async () => {
     try {
       setIsLoading(true);
-      const conversationHistory = messages.map((msg) => ({
+      const savedSession = sessionId ? await localSessionStore.getSessionById(sessionId) : null;
+
+      if (savedSession?.evaluation) {
+        setEvaluation(savedSession.evaluation);
+        return;
+      }
+
+      const sourceMessages = messages.length > 0 ? messages : savedSession?.messages ?? [];
+      const evaluationScenarioId = scenarioId || storedScenarioId || savedSession?.scenarioId || '';
+      const evaluationCharacterId = characterId || savedSession?.characterId || '';
+      const conversationHistory = sourceMessages.map((msg) => ({
         role: msg.role,
         content: msg.content,
       }));
 
       const result = await chatAPI.evaluateSession(
         sessionId || '',
-        characterId || '',
-        '', // scenarioId
+        evaluationCharacterId,
+        evaluationScenarioId,
         conversationHistory
       );
 
       setEvaluation(result);
+      if (sessionId) {
+        await localSessionStore.saveEvaluation(sessionId, result);
+      }
     } catch (error) {
       console.error('Evaluation fetch error:', error);
     } finally {

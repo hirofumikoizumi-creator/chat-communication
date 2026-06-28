@@ -17,7 +17,7 @@ export interface ChatState {
 
   // Actions
   initializeSession: (sessionId: string, characterId: string, scenarioId: string) => void;
-  addMessage: (role: 'user' | 'assistant', content: string) => void;
+  addMessage: (role: 'user' | 'assistant', content: string) => Message;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearChat: () => void;
@@ -40,18 +40,23 @@ export const useChatStore = create<ChatState>((set) => ({
       error: null,
     }),
 
-  addMessage: (role, content) =>
+  addMessage: (role, content) => {
+    const message = {
+      id: `${Date.now()}-${Math.random()}`,
+      role,
+      content,
+      timestamp: Date.now(),
+    };
+
     set((state) => ({
       messages: [
         ...state.messages,
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          role,
-          content,
-          timestamp: Date.now(),
-        },
+        message,
       ],
-    })),
+    }));
+
+    return message;
+  },
 
   setLoading: (loading) => set({ isLoading: loading }),
 

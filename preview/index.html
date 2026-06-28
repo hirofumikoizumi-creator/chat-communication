@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chat Match</title>
+    <style>
+      :root {
+        --bg: #fff7f2;
+        --ink: #251d22;
+        --muted: #78666e;
+        --coral: #ff5f7e;
+        --rose: #ff8aa2;
+        --teal: #2bb8a8;
+        --card: #fff;
+        --line: rgb(37 29 34 / 10%);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; background: radial-gradient(circle at 20% 0%, #ffe0e8, transparent 32%), var(--bg); }
+      button, textarea { font: inherit; }
+      button { cursor: pointer; }
+
+      .app {
+        width: min(100%, 480px);
+        min-height: 100vh;
+        margin: 0 auto;
+        background: linear-gradient(#fffaf7, #fff1f4);
+        box-shadow: 0 0 50px rgb(37 29 34 / 10%);
+      }
+
+      .screen { display: none; min-height: 100vh; padding: 18px 16px 26px; }
+      .screen.active { display: block; }
+      .chat-screen { display: none; min-height: 100vh; grid-template-rows: auto 1fr auto auto; }
+      .chat-screen.active { display: grid; }
+
+      .brandbar, .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: 0;
+      }
+
+      .logo-mark {
+        display: grid;
+        place-items: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 13px;
+        color: #fff;
+        background: linear-gradient(135deg, var(--coral), #9d6cff);
+        box-shadow: 0 10px 22px rgb(255 95 126 / 26%);
+      }
+
+      .icon-btn {
+        display: grid;
+        place-items: center;
+        min-width: 42px;
+        height: 42px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgb(255 255 255 / 76%);
+        color: var(--ink);
+      }
+
+      .subcopy {
+        margin: -8px 0 16px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .deck {
+        position: relative;
+        height: min(68vh, 620px);
+        min-height: 500px;
+        margin: 0 0 16px;
+      }
+
+      .match-card {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        border: 0;
+        border-radius: 28px;
+        padding: 0;
+        text-align: left;
+        color: #fff;
+        background: #ddd;
+        box-shadow: 0 22px 45px rgb(37 29 34 / 18%);
+        transition: transform 220ms ease, opacity 220ms ease;
+        touch-action: pan-y;
+      }
+
+      .match-card:nth-child(2) { transform: translateY(12px) scale(.97); opacity: .72; }
+      .match-card:nth-child(3) { transform: translateY(24px) scale(.94); opacity: .42; }
+
+      .photo {
+        position: absolute;
+        inset: 0;
+        background-image: var(--sheet);
+        background-size: 500% 200%;
+        background-position: var(--pos);
+      }
+
+      .match-card::after, .hero-photo::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, transparent 42%, rgb(10 8 12 / 35%) 68%, rgb(10 8 12 / 86%));
+      }
+
+      .card-info {
+        position: absolute;
+        z-index: 1;
+        inset-inline: 20px;
+        bottom: 20px;
+      }
+
+      .name-line {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+
+      .name-line strong { font-size: 34px; line-height: 1; }
+      .name-line span { font-size: 24px; font-weight: 700; }
+      .tagline { margin: 0 0 10px; font-size: 15px; line-height: 1.45; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+      .chip { padding: 7px 10px; border-radius: 999px; background: rgb(255 255 255 / 18%); backdrop-filter: blur(12px); font-size: 12px; font-weight: 700; }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 64px 1fr 64px;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .pass, .like {
+        height: 64px;
+        border: 0;
+        border-radius: 999px;
+        background: #fff;
+        font-size: 27px;
+        box-shadow: 0 12px 26px rgb(37 29 34 / 12%);
+      }
+
+      .like { color: var(--coral); }
+      .pass { color: #7c8592; }
+
+      .history {
+        height: 54px;
+        border: 0;
+        border-radius: 999px;
+        color: #fff;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--coral), #9d6cff);
+        box-shadow: 0 12px 26px rgb(255 95 126 / 22%);
+      }
+
+      .hero-photo {
+        position: relative;
+        min-height: 450px;
+        overflow: hidden;
+        margin: 0 -16px 18px;
+        background-image: var(--sheet);
+        background-size: 500% 200%;
+        background-position: var(--pos);
+      }
+
+      .profile-name {
+        position: absolute;
+        z-index: 1;
+        left: 18px;
+        right: 18px;
+        bottom: 18px;
+        color: #fff;
+      }
+
+      h1, h2, p { margin-top: 0; }
+      .profile-name h1 { margin-bottom: 6px; font-size: 38px; line-height: 1; }
+      .profile-name p { margin-bottom: 0; color: rgb(255 255 255 / 84%); }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+
+      .subphoto {
+        position: relative;
+        min-height: 150px;
+        overflow: hidden;
+        border-radius: 18px;
+        background-image: var(--sheet);
+        background-size: 580% 230%;
+        background-position: var(--subpos);
+      }
+
+      .subphoto::after {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        bottom: 10px;
+        padding: 6px 9px;
+        border-radius: 999px;
+        color: #fff;
+        background: rgb(37 29 34 / 48%);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .panel {
+        margin-bottom: 14px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: rgb(255 255 255 / 78%);
+      }
+
+      .scenario {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #fff;
+        text-align: left;
+      }
+
+      .scenario.selected {
+        border-color: rgb(255 95 126 / 75%);
+        background: #fff0f4;
+      }
+
+      .primary {
+        width: 100%;
+        min-height: 54px;
+        border: 0;
+        border-radius: 999px;
+        color: #fff;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--coral), var(--rose));
+      }
+
+      .primary:disabled { opacity: .45; cursor: default; }
+
+      .chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+        background: rgb(255 255 255 / 78%);
+      }
+
+      .mini {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background-image: var(--sheet);
+        background-size: 500% 200%;
+        background-position: var(--pos);
+      }
+
+      .messages { padding: 16px; overflow: auto; }
+      .bubble { max-width: 85%; margin: 8px 0; padding: 11px 13px; border-radius: 18px; line-height: 1.55; }
+      .user { margin-left: auto; color: #fff; background: var(--coral); border-bottom-right-radius: 5px; }
+      .assistant { margin-right: auto; background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 5px; }
+
+      .composer {
+        display: flex;
+        gap: 8px;
+        padding: 12px 16px;
+        background: #fff;
+        border-top: 1px solid var(--line);
+      }
+
+      .composer textarea {
+        flex: 1;
+        min-height: 46px;
+        max-height: 110px;
+        resize: vertical;
+        border: 1px solid var(--line);
+        border-radius: 24px;
+        padding: 12px 14px;
+        background: #fffaf7;
+      }
+
+      .send { min-width: 64px; border: 0; border-radius: 24px; color: #fff; font-weight: 900; background: var(--coral); }
+      .finish { margin: 0 16px 12px; }
+      .muted { color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+      .score { margin-bottom: 14px; }
+      .bar { height: 9px; overflow: hidden; border-radius: 999px; background: #efe3e7; }
+      .fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--coral), var(--teal)); }
+      .rank { display: grid; place-items: center; margin-bottom: 16px; padding: 24px; border-radius: 22px; background: linear-gradient(135deg, #ffe36d, #ff94aa); }
+      .rank strong { font-size: 52px; }
+      .empty { display: grid; min-height: 50vh; place-items: center; text-align: center; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <main class="app" style="--sheet: url('assets/chat-match-characters-18-35.png')">
+      <section id="home" class="screen active">
+        <div class="brandbar">
+          <div class="logo"><span class="logo-mark">♡</span>Chat Match</div>
+          <button class="icon-btn" onclick="showHistory()">⌘</button>
+        </div>
+        <p class="subcopy">スワイプして相手を選び、いいねで会話練習へ。全キャラクターは18〜35歳です。</p>
+        <div id="deck" class="deck"></div>
+        <div class="actions">
+          <button class="pass" onclick="passCard()">×</button>
+          <button class="history" onclick="showHistory()">会話履歴</button>
+          <button class="like" onclick="likeCard()">♡</button>
+        </div>
+      </section>
+
+      <section id="detail" class="screen">
+        <div class="topbar">
+          <button class="icon-btn" onclick="showScreen('home')">‹</button>
+          <strong>Chat Match</strong>
+          <button class="icon-btn" onclick="showHistory()">⌘</button>
+        </div>
+        <div id="profileHero" class="hero-photo"></div>
+        <div class="gallery" id="gallery"></div>
+        <div class="panel">
+          <h2>プロフィール</h2>
+          <p id="profileBio" class="muted"></p>
+        </div>
+        <div class="panel">
+          <h2>シナリオ</h2>
+          <div id="scenarios"></div>
+          <button id="startButton" class="primary" disabled onclick="startChat()">マッチしてチャット開始</button>
+        </div>
+      </section>
+
+      <section id="chat" class="chat-screen">
+        <div id="chatHeader" class="chat-header"></div>
+        <div id="messages" class="messages"></div>
+        <div class="composer">
+          <textarea id="messageInput" maxlength="500" placeholder="メッセージを入力..."></textarea>
+          <button class="send" onclick="sendMessage()">送信</button>
+        </div>
+        <button class="primary finish" onclick="finishChat()">会話を終了して評価を見る</button>
+      </section>
+
+      <section id="results" class="screen">
+        <div class="topbar">
+          <button class="icon-btn" onclick="showScreen('home')">‹</button>
+          <strong>評価結果</strong>
+          <button class="icon-btn" onclick="showHistory()">⌘</button>
+        </div>
+        <div id="resultContent"></div>
+      </section>
+
+      <section id="history" class="screen">
+        <div class="topbar">
+          <button class="icon-btn" onclick="showScreen('home')">‹</button>
+          <strong>会話履歴</strong>
+          <span></span>
+        </div>
+        <div id="historyList"></div>
+      </section>
+    </main>
+
+    <script>
+      const STORAGE_KEY = "chat-match.sessions.v2";
+      const characters = [
+        { id: "aoi", name: "葵", age: 18, role: "美大生", pos: "0% 0%", bio: "絵と古着屋めぐりが好き。最初は少し緊張するけれど、丁寧な言葉に弱いタイプ。", tags: ["art", "vintage", "shy"] },
+        { id: "riko", name: "莉子", age: 20, role: "服飾学生", pos: "25% 0%", bio: "流行に敏感で写真好き。軽いノリより、センスのある一言に反応しやすい。", tags: ["fashion", "camera", "trend"] },
+        { id: "mio", name: "美緒", age: 22, role: "カフェバリスタ", pos: "50% 0%", bio: "聞き上手で穏やか。日常の小さな話題を広げる会話が得意。", tags: ["coffee", "calm", "music"] },
+        { id: "hina", name: "陽菜", age: 24, role: "歯科衛生士", pos: "75% 0%", bio: "清潔感と誠実さを重視。急な距離詰めより、安心できる会話が好き。", tags: ["health", "clean", "kind"] },
+        { id: "yuna", name: "結菜", age: 25, role: "看護師", pos: "100% 0%", bio: "忙しい毎日の中でも明るい。ねぎらいと自然な質問に好印象を持つ。", tags: ["nurse", "bright", "care"] },
+        { id: "sara", name: "紗良", age: 27, role: "プロダクトデザイナー", pos: "0% 100%", bio: "ものづくりと展示会が好き。具体的で知的な会話に惹かれやすい。", tags: ["design", "gallery", "smart"] },
+        { id: "eri", name: "絵里", age: 28, role: "マーケター", pos: "25% 100%", bio: "仕事も遊びもテンポ良く楽しむタイプ。軽やかで前向きな話題が合う。", tags: ["marketing", "city", "active"] },
+        { id: "mai", name: "舞", age: 30, role: "小学校教員", pos: "50% 100%", bio: "優しく面倒見がいい。言葉選びの丁寧さや価値観の近さを大切にする。", tags: ["teacher", "warm", "books"] },
+        { id: "kaori", name: "香織", age: 32, role: "スタートアップ創業者", pos: "75% 100%", bio: "自立していて行動的。尊重し合える会話と、相手の芯の強さを見る。", tags: ["founder", "drive", "wine"] },
+        { id: "natsuki", name: "夏希", age: 35, role: "ヨガインストラクター", pos: "100% 100%", bio: "自然体で落ち着いた雰囲気。無理のない距離感とポジティブさを好む。", tags: ["yoga", "wellness", "nature"] },
+      ];
+      const scenarios = [
+        { id: "first_message", name: "初回メッセージ", description: "マッチ後の第一声。相手への興味と清潔感が大切です。" },
+        { id: "continue_chat", name: "会話継続", description: "共感、質問、自分の話のバランスを練習します。" },
+        { id: "date_invite", name: "デート誘導", description: "相手が安心できる誘い方とタイミングを練習します。" },
+      ];
+      let state = { index: 0, characterId: null, scenarioId: null, sessionId: null, messages: [] };
+
+      const getSessions = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      const setSessions = (sessions) => localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+      const byId = (items, id) => items.find((item) => item.id === id);
+      const current = () => characters[state.index % characters.length];
+
+      function showScreen(id) {
+        document.querySelectorAll(".screen,.chat-screen").forEach((screen) => screen.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+      }
+
+      function renderDeck() {
+        const cards = [0, 1, 2].map((offset) => characters[(state.index + offset) % characters.length]);
+        document.getElementById("deck").innerHTML = cards.map((character) => `
+          <button class="match-card" style="--pos:${character.pos}" onclick="openProfile('${character.id}')">
+            <div class="photo"></div>
+            <div class="card-info">
+              <div class="name-line"><strong>${character.name}</strong><span>${character.age}</span></div>
+              <p class="tagline">${character.role}・${character.bio}</p>
+              <div class="chips">${character.tags.map((tag) => `<span class="chip">${tag}</span>`).join("")}</div>
+            </div>
+          </button>
+        `).join("");
+      }
+
+      function passCard() { state.index = (state.index + 1) % characters.length; renderDeck(); }
+      function likeCard() { openProfile(current().id); }
+
+      function openProfile(id) {
+        const character = byId(characters, id);
+        state.characterId = id;
+        state.scenarioId = null;
+        document.getElementById("profileHero").style.setProperty("--pos", character.pos);
+        document.getElementById("profileHero").innerHTML = `
+          <div class="profile-name">
+            <h1>${character.name}, ${character.age}</h1>
+            <p>${character.role}</p>
+          </div>
+        `;
+        document.getElementById("gallery").innerHTML = ["日常", "仕事", "休日", "好きな場所"].map((label, index) => `
+          <div class="subphoto" data-label="${label}" style="--subpos:${subPosition(character, index)}"></div>
+        `).join("");
+        document.getElementById("profileBio").textContent = character.bio;
+        renderScenarios();
+        showScreen("detail");
+      }
+
+      function subPosition(character, index) {
+        const base = character.pos.split(" ");
+        const x = parseFloat(base[0]);
+        const y = parseFloat(base[1]);
+        const shift = [-8, 7, -3, 5][index];
+        return `${Math.max(0, Math.min(100, x + shift))}% ${Math.max(0, Math.min(100, y + (index % 2 ? -8 : 8)))}%`;
+      }
+
+      function renderScenarios() {
+        document.getElementById("scenarios").innerHTML = scenarios.map((scenario) => `
+          <button class="scenario ${state.scenarioId === scenario.id ? "selected" : ""}" onclick="selectScenario('${scenario.id}')">
+            <strong>${scenario.name}</strong><br><span class="muted">${scenario.description}</span>
+          </button>
+        `).join("");
+        document.getElementById("startButton").disabled = !state.scenarioId;
+      }
+
+      function selectScenario(id) { state.scenarioId = id; renderScenarios(); }
+
+      function startChat() {
+        const now = new Date().toISOString();
+        state.sessionId = `anon-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+        state.messages = [];
+        const sessions = getSessions();
+        sessions.unshift({ id: state.sessionId, characterId: state.characterId, scenarioId: state.scenarioId, createdAt: now, updatedAt: now, messages: [] });
+        setSessions(sessions);
+        renderChat();
+        showScreen("chat");
+      }
+
+      function renderChat() {
+        const character = byId(characters, state.characterId);
+        const scenario = byId(scenarios, state.scenarioId);
+        document.getElementById("chatHeader").innerHTML = `
+          <div class="mini"><div class="avatar" style="--pos:${character.pos}"></div><div><strong>${character.name}</strong><br><span class="muted">${scenario.name}</span></div></div>
+          <button class="icon-btn" onclick="showScreen('detail')">×</button>
+        `;
+        document.getElementById("messages").innerHTML = state.messages.length
+          ? state.messages.map((message) => `<div class="bubble ${message.role}">${message.content}</div>`).join("")
+          : `<div class="empty">マッチしました。最初のメッセージを送ってみましょう。</div>`;
+      }
+
+      function reply(text) {
+        const character = byId(characters, state.characterId);
+        if (state.scenarioId === "date_invite") return text.includes("？") || text.includes("?")
+          ? `誘ってくれてありがとう。${character.name}としては、具体的で安心できる誘い方だと前向きになりやすいです。`
+          : "ありがとう。場所や時間がもう少し見えると、安心して返事しやすいかも。";
+        if (state.scenarioId === "continue_chat") return text.length > 24
+          ? "ちゃんと話を広げようとしてくれているのが伝わります。もう少しあなたの感想も聞きたいです。"
+          : "いいですね。そこからもう一歩、質問か自分の話を足すと自然に続きそう。";
+        return "メッセージありがとう。最初の一言に相手への興味が入っていて、返信しやすい雰囲気です。";
+      }
+
+      function saveCurrentSession(evaluation) {
+        const sessions = getSessions();
+        const session = sessions.find((item) => item.id === state.sessionId);
+        if (!session) return;
+        session.messages = state.messages;
+        session.updatedAt = new Date().toISOString();
+        if (evaluation) session.evaluation = evaluation;
+        setSessions(sessions);
+      }
+
+      function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = "";
+        state.messages.push({ role: "user", content: text, timestamp: Date.now() });
+        state.messages.push({ role: "assistant", content: reply(text), timestamp: Date.now() });
+        saveCurrentSession();
+        renderChat();
+      }
+
+      function evaluate() {
+        const text = state.messages.filter((message) => message.role === "user").map((message) => message.content).join("\n");
+        const questionCount = (text.match(/[？?]/g) || []).length;
+        const empathyHits = ["わかる", "大変", "嬉しい", "ありがとう", "いいね", "素敵", "楽しい"].filter((word) => text.includes(word)).length;
+        const clamp = (score) => Math.max(0, Math.min(100, Math.round(score)));
+        const empathy = clamp(45 + empathyHits * 12 + Math.min(text.length / 12, 20));
+        const questioning = clamp(40 + questionCount * 18);
+        const distance = clamp(70 - Math.max(0, text.length - 260) / 8 + (state.scenarioId === "date_invite" ? 4 : 0));
+        const attractiveness = clamp((empathy + questioning + distance) / 3 + (state.messages.length >= 4 ? 6 : 0));
+        const average = (empathy + questioning + distance + attractiveness) / 4;
+        return { empathy, questioning, distance, attractiveness, rank: average >= 85 ? "S" : average >= 72 ? "A" : average >= 58 ? "B" : average >= 42 ? "C" : "D" };
+      }
+
+      function finishChat() {
+        const result = evaluate();
+        saveCurrentSession(result);
+        renderResult(result);
+        showScreen("results");
+      }
+
+      function renderResult(result) {
+        const score = (label, value) => `<div class="score"><strong>${label}</strong><div class="bar"><div class="fill" style="width:${value}%"></div></div><span class="muted">${value}/100</span></div>`;
+        document.getElementById("resultContent").innerHTML = `
+          <div class="rank"><span>ランク</span><strong>${result.rank}</strong></div>
+          <div class="panel">${score("共感力", result.empathy)}${score("質問力", result.questioning)}${score("距離感", result.distance)}${score("魅力度", result.attractiveness)}</div>
+          <div class="panel"><strong>評価メモ</strong><p class="muted">scenarioId=${state.scenarioId} を使った無料ローカル評価です。本番では同じ入力をQwenへ渡します。</p></div>
+          <button class="primary" onclick="showScreen('home')">ホームに戻る</button>
+        `;
+      }
+
+      function showHistory() {
+        const sessions = getSessions();
+        document.getElementById("historyList").innerHTML = sessions.length ? sessions.map((session) => {
+          const character = byId(characters, session.characterId);
+          const scenario = byId(scenarios, session.scenarioId);
+          return `<button class="scenario" onclick="openHistory('${session.id}')"><strong>${character.name}, ${character.age}</strong><br><span class="muted">${scenario.name}・ランク ${session.evaluation?.rank || "-"}・${new Date(session.updatedAt).toLocaleDateString("ja-JP")}</span></button>`;
+        }).join("") : `<div class="empty">まだ会話履歴がありません</div>`;
+        showScreen("history");
+      }
+
+      function openHistory(id) {
+        const session = getSessions().find((item) => item.id === id);
+        if (!session) return;
+        state = { ...state, characterId: session.characterId, scenarioId: session.scenarioId, sessionId: session.id, messages: session.messages || [] };
+        renderResult(session.evaluation || evaluate());
+        showScreen("results");
+      }
+
+      renderDeck();
+    </script>
+  </body>
+</html>
