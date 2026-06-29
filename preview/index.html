@@ -578,7 +578,7 @@
     </style>
   </head>
   <body>
-    <main class="app" style="--sheet: url('assets/chat-match-characters-18-35.png?v=3')">
+    <main class="app" id="appRoot">
       <section id="home" class="screen active">
         <div class="brandbar">
           <div class="logo"><span class="logo-mark">♡</span>Chat Match</div>
@@ -670,6 +670,8 @@
     <script>
       const STORAGE_KEY = "chat-match.sessions.v2";
       const USER_PROFILE_KEY = "chat-match.user-profile.v1";
+      const BUNDLED_ASSET_BASE = "assets/";
+      const BUNDLED_SHEET_IMAGE = "chat-match-characters-18-35.png";
       const QWEN_ENDPOINT = "http://127.0.0.1:11434/api/chat";
       const QWEN_MODELS = ["qwen2.5:7b", "qwen2.5", "qwen3:8b", "qwen3", "qwen:latest"];
       const QWEN_OPENAI_ENDPOINTS = [
@@ -741,6 +743,7 @@
       const setUserProfile = (profile) => localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profile));
       const byId = (items, id) => items.find((item) => item.id === id);
       const current = () => characters[state.index % characters.length];
+      const bundledAsset = (fileName, version = 1) => `${BUNDLED_ASSET_BASE}${fileName}?v=${version}`;
       let swipeState = null;
       let suppressCardClick = false;
       const escapeHTML = (value) => String(value)
@@ -888,7 +891,7 @@
         `;
         document.getElementById("gallery").innerHTML = photoStories(character).map((photo, index) => `
           <article class="subphoto-card">
-            <button class="subphoto" data-label="${photo.label}" style="--subimage:url('assets/${character.subImage}?v=1'); --subpos:${subPosition(index)}" onclick="openPhotoModal('${character.subImage}', '${subPosition(index)}')"></button>
+            <button class="subphoto" data-label="${photo.label}" style="--subimage:url('${bundledAsset(character.subImage)}'); --subpos:${subPosition(index)}" onclick="openPhotoModal('${character.subImage}', '${subPosition(index)}')"></button>
             <div class="subcomment"><strong>${photo.label}</strong><span>${photo.comment}</span></div>
           </article>
         `).join("");
@@ -915,7 +918,7 @@
       function openPhotoModal(image, position) {
         const modal = document.getElementById("photoModal");
         const card = document.getElementById("modalCard");
-        card.style.setProperty("--modalimage", `url('assets/${image}?v=1')`);
+        card.style.setProperty("--modalimage", `url('${bundledAsset(image)}')`);
         card.style.setProperty("--modalpos", position);
         modal.classList.add("active");
       }
@@ -1203,6 +1206,7 @@
       }
 
       renderUserProfileForm();
+      document.getElementById("appRoot").style.setProperty("--sheet", `url('${bundledAsset(BUNDLED_SHEET_IMAGE, 3)}')`);
       renderDeck();
     </script>
   </body>
