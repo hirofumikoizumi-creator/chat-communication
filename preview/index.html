@@ -473,6 +473,36 @@
         background: #fff2f3;
       }
 
+      .mode-grid {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .mode-card {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fffdfa;
+        text-align: left;
+      }
+
+      .mode-card.selected {
+        border-color: rgb(232 83 99 / 76%);
+        background: #fff2f3;
+      }
+
+      .mode-card strong,
+      .scenario strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .scenario-group {
+        margin-top: 4px;
+      }
+
       .primary {
         width: 100%;
         min-height: 54px;
@@ -597,7 +627,7 @@
           <p id="profileBio" class="muted"></p>
         </div>
         <div class="panel">
-          <h2>シナリオ</h2>
+          <h2>会話モード</h2>
           <div id="scenarios"></div>
           <button id="startButton" class="primary" disabled onclick="startChat()">マッチしてチャット開始</button>
         </div>
@@ -699,7 +729,11 @@
         { id: "continue_chat", name: "会話継続", description: "共感、質問、自分の話のバランスを練習します。" },
         { id: "date_invite", name: "デート誘導", description: "相手が安心できる誘い方とタイミングを練習します。" },
       ];
-      let state = { index: 0, characterId: null, scenarioId: null, sessionId: null, messages: [] };
+      const modes = [
+        { id: "scenario", name: "シナリオモード", description: "シナリオに基づき、自分のコミュニケーションをトレーニングするモードです。" },
+        { id: "free", name: "フリーモード", description: "彼女たちと自由に会話を楽しむモードです。" },
+      ];
+      let state = { index: 0, characterId: null, mode: "scenario", scenarioId: null, sessionId: null, messages: [] };
 
       const getSessions = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
       const setSessions = (sessions) => localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
@@ -843,6 +877,7 @@
       function openProfile(id) {
         const character = byId(characters, id);
         state.characterId = id;
+        state.mode = "scenario";
         state.scenarioId = null;
         document.getElementById("profileHero").style.setProperty("--pos", character.pos);
         document.getElementById("profileHero").innerHTML = `
@@ -864,10 +899,10 @@
 
       function photoStories(character) {
         return [
-          { label: "日常", comment: `${character.name}が普段大切にしている空気感。${character.tags[0]}の雰囲気が出ています。` },
-          { label: "仕事", comment: `${character.role}としての表情。会話ではこの価値観に触れると自然です。` },
-          { label: "休日", comment: `少し力を抜いた時間。${character.name}の好きな過ごし方を聞くきっかけになります。` },
-          { label: "好きな場所", comment: `距離を縮めるヒントになる一枚。誘うならこの雰囲気に合わせると安心感があります。` },
+          { label: "日常", comment: "これは何気ない日の一枚。こういう普段の話から始めてくれると、私は返しやすいです。" },
+          { label: "仕事", comment: `仕事中はけっこう真剣です。${character.role}の話も、自然に聞いてくれるとうれしいです。` },
+          { label: "休日", comment: "休みの日は少し力を抜いて過ごしたい派。あなたの休日の過ごし方も聞いてみたいです。" },
+          { label: "好きな場所", comment: "落ち着ける場所が好きです。もし誘ってくれるなら、こういう雰囲気だと安心します。" },
         ];
       }
 
@@ -890,12 +925,27 @@
       }
 
       function renderScenarios() {
-        document.getElementById("scenarios").innerHTML = scenarios.map((scenario) => `
-          <button class="scenario ${state.scenarioId === scenario.id ? "selected" : ""}" onclick="selectScenario('${scenario.id}')">
-            <strong>${scenario.name}</strong><br><span class="muted">${scenario.description}</span>
+        const modeCards = modes.map((mode) => `
+          <button class="mode-card ${state.mode === mode.id ? "selected" : ""}" onclick="selectMode('${mode.id}')">
+            <strong>${mode.name}</strong><span class="muted">${mode.description}</span>
           </button>
         `).join("");
-        document.getElementById("startButton").disabled = !state.scenarioId;
+        const scenarioCards = state.mode === "scenario"
+          ? `<div class="scenario-group">${scenarios.map((scenario) => `
+              <button class="scenario ${state.scenarioId === scenario.id ? "selected" : ""}" onclick="selectScenario('${scenario.id}')">
+                <strong>${scenario.name}</strong><span class="muted">${scenario.description}</span>
+              </button>
+            `).join("")}</div>`
+          : `<div class="scenario-group"><p class="muted">テーマを決めず、彼女のプロフィールや今の気分に合わせて自然に会話します。</p></div>`;
+        document.getElementById("scenarios").innerHTML = `<div class="mode-grid">${modeCards}</div>${scenarioCards}`;
+        document.getElementById("startButton").disabled = state.mode === "scenario" && !state.scenarioId;
+        document.getElementById("startButton").textContent = state.mode === "free" ? "フリートークを始める" : "マッチしてチャット開始";
+      }
+
+      function selectMode(id) {
+        state.mode = id;
+        state.scenarioId = id === "free" ? "free_chat" : null;
+        renderScenarios();
       }
 
       function selectScenario(id) { state.scenarioId = id; renderScenarios(); }
@@ -904,8 +954,10 @@
         const now = new Date().toISOString();
         state.sessionId = `anon-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
         state.messages = [];
+        const activeScenarioId = state.mode === "free" ? "free_chat" : state.scenarioId;
+        state.scenarioId = activeScenarioId;
         const sessions = getSessions();
-        sessions.unshift({ id: state.sessionId, characterId: state.characterId, scenarioId: state.scenarioId, userProfile: getUserProfile(), createdAt: now, updatedAt: now, messages: [] });
+        sessions.unshift({ id: state.sessionId, characterId: state.characterId, mode: state.mode, scenarioId: activeScenarioId, userProfile: getUserProfile(), createdAt: now, updatedAt: now, messages: [] });
         setSessions(sessions);
         renderChat();
         showScreen("chat");
@@ -913,7 +965,7 @@
 
       function renderChat() {
         const character = byId(characters, state.characterId);
-        const scenario = byId(scenarios, state.scenarioId);
+        const scenario = getScenarioInfo(state.scenarioId);
         document.getElementById("chatHeader").innerHTML = `
           <div class="mini"><div class="avatar" style="--pos:${character.pos}"></div><div><strong>${character.name}</strong><br><span class="muted">${scenario.name}</span></div></div>
           <button class="icon-btn" onclick="showScreen('detail')">×</button>
@@ -924,9 +976,15 @@
       }
 
       function scenarioGoal() {
+        if (state.scenarioId === "free_chat") return "自由会話。トレーニング感を出さず、相手本人として自然な雑談や関係づくりの会話を楽しみます。";
         if (state.scenarioId === "date_invite") return "デートに誘われる場面。相手が安心できる具体性、タイミング、誠実さを自然に見ています。";
         if (state.scenarioId === "continue_chat") return "会話を続ける場面。共感、質問、自分の話のバランスを自然に見ています。";
         return "マッチ後の初回メッセージ。第一印象、清潔感、相手への興味が自然に伝わるかを見ています。";
+      }
+
+      function getScenarioInfo(id) {
+        if (id === "free_chat") return { id, name: "フリーモード", description: "自由に会話を楽しむモードです。" };
+        return byId(scenarios, id) || scenarios[0];
       }
 
       function characterVoice(character) {
@@ -1130,7 +1188,7 @@
         const sessions = getSessions();
         document.getElementById("historyList").innerHTML = sessions.length ? sessions.map((session) => {
           const character = byId(characters, session.characterId);
-          const scenario = byId(scenarios, session.scenarioId);
+          const scenario = getScenarioInfo(session.scenarioId);
           return `<button class="scenario" onclick="openHistory('${session.id}')"><strong>${character.name}, ${character.age}</strong><br><span class="muted">${scenario.name}・ランク ${session.evaluation?.rank || "-"}・${new Date(session.updatedAt).toLocaleDateString("ja-JP")}</span></button>`;
         }).join("") : `<div class="empty">まだ会話履歴がありません</div>`;
         showScreen("history");
@@ -1139,7 +1197,7 @@
       function openHistory(id) {
         const session = getSessions().find((item) => item.id === id);
         if (!session) return;
-        state = { ...state, characterId: session.characterId, scenarioId: session.scenarioId, sessionId: session.id, messages: session.messages || [] };
+        state = { ...state, characterId: session.characterId, mode: session.mode || (session.scenarioId === "free_chat" ? "free" : "scenario"), scenarioId: session.scenarioId, sessionId: session.id, messages: session.messages || [] };
         renderResult(session.evaluation || evaluate());
         showScreen("results");
       }
