@@ -14,6 +14,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useChatStore } from '@/src/store/chatStore';
 import { chatAPI } from '@/src/services/api';
+import { localSessionStore } from '@/src/services/localSessionStore';
 import { getCharacterById } from '@/src/data/characters';
 import { getScenarioById } from '@/src/data/scenarios';
 // import { useBannerAd } from '@/src/hooks/useAds';
@@ -50,10 +51,13 @@ export default function ChatScreen() {
 
     const userMessage = inputText.trim();
     setInputText('');
-    addMessage('user', userMessage);
+    const savedUserMessage = addMessage('user', userMessage);
+    const messagesWithUser = [...messages, savedUserMessage];
     setIsSending(true);
 
     try {
+      await localSessionStore.saveMessages(sessionId, messagesWithUser);
+
       const conversationHistory = messages.map((msg) => ({
         role: msg.role,
         content: msg.content,
@@ -67,7 +71,8 @@ export default function ChatScreen() {
         conversationHistory
       );
 
-      addMessage('assistant', response);
+      const savedAssistantMessage = addMessage('assistant', response);
+      await localSessionStore.saveMessages(sessionId, [...messagesWithUser, savedAssistantMessage]);
     } catch (error) {
       setError('メッセージの送信に失敗しました');
       console.error(error);
