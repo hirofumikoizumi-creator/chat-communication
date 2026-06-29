@@ -6,15 +6,16 @@
     <title>Chat Match</title>
     <style>
       :root {
-        --bg: #fff6f4;
-        --ink: #251d22;
-        --muted: #78666e;
-        --coral: #ff5f7e;
-        --rose: #ff8aa2;
-        --violet: #8a6cff;
-        --teal: #2bb8a8;
+        --bg: #f6f1ec;
+        --ink: #221f1c;
+        --muted: #756c64;
+        --coral: #e85363;
+        --rose: #f48a9a;
+        --violet: #7567d9;
+        --teal: #1f9f91;
+        --gold: #c79a48;
         --card: #fff;
-        --line: rgb(37 29 34 / 10%);
+        --line: rgb(34 31 28 / 11%);
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         color: var(--ink);
         background: var(--bg);
@@ -25,21 +26,20 @@
         margin: 0;
         min-height: 100vh;
         background:
-          radial-gradient(circle at 10% -10%, #ffd5df 0 22%, transparent 36%),
-          radial-gradient(circle at 110% 20%, #d9fff8 0 18%, transparent 34%),
-          linear-gradient(135deg, #fffaf7, #fff0f5 52%, #f2fffc);
+          linear-gradient(120deg, rgb(34 31 28 / 4%) 0 1px, transparent 1px 12px),
+          linear-gradient(180deg, #fbf7f2 0%, #f5eee8 48%, #eef6f3 100%);
       }
       button, textarea { font: inherit; }
       button { cursor: pointer; }
+      button:disabled { cursor: default; opacity: .58; }
 
       .app {
         width: min(100%, 480px);
         min-height: 100vh;
         margin: 0 auto;
         background:
-          linear-gradient(180deg, rgb(255 255 255 / 82%), rgb(255 244 247 / 88%)),
-          radial-gradient(circle at 50% 0%, #fff, transparent 45%);
-        box-shadow: 0 0 70px rgb(37 29 34 / 14%);
+          linear-gradient(180deg, rgb(255 255 255 / 94%), rgb(250 244 239 / 94%));
+        box-shadow: 0 0 70px rgb(34 31 28 / 15%);
       }
 
       .screen { display: none; min-height: 100vh; padding: 18px 16px 26px; }
@@ -59,7 +59,7 @@
         display: inline-flex;
         align-items: center;
         gap: 9px;
-        font-size: 26px;
+        font-size: 24px;
         font-weight: 900;
         letter-spacing: 0;
       }
@@ -69,10 +69,10 @@
         place-items: center;
         width: 38px;
         height: 38px;
-        border-radius: 13px;
+        border-radius: 12px;
         color: #fff;
-        background: linear-gradient(135deg, var(--coral), #9d6cff);
-        box-shadow: 0 10px 22px rgb(255 95 126 / 26%);
+        background: #221f1c;
+        box-shadow: 0 10px 22px rgb(34 31 28 / 18%);
       }
 
       .icon-btn {
@@ -82,10 +82,10 @@
         height: 42px;
         border: 1px solid var(--line);
         border-radius: 999px;
-        background: rgb(255 255 255 / 76%);
+        background: rgb(255 255 255 / 86%);
         color: var(--ink);
         font-weight: 900;
-        box-shadow: 0 10px 22px rgb(37 29 34 / 8%);
+        box-shadow: 0 10px 22px rgb(34 31 28 / 8%);
       }
 
       .history-pill {
@@ -96,10 +96,10 @@
         padding: 0 14px;
         border: 1px solid var(--line);
         border-radius: 999px;
-        background: rgb(255 255 255 / 78%);
+        background: rgb(255 255 255 / 88%);
         color: var(--ink);
         font-weight: 900;
-        box-shadow: 0 10px 22px rgb(37 29 34 / 8%);
+        box-shadow: 0 10px 22px rgb(34 31 28 / 8%);
       }
 
       .subcopy {
@@ -113,9 +113,9 @@
         margin-bottom: 16px;
         padding: 14px;
         border: 1px solid var(--line);
-        border-radius: 22px;
-        background: linear-gradient(180deg, rgb(255 255 255 / 90%), rgb(255 250 247 / 82%));
-        box-shadow: 0 16px 32px rgb(37 29 34 / 8%);
+        border-radius: 18px;
+        background: rgb(255 255 255 / 92%);
+        box-shadow: 0 16px 32px rgb(34 31 28 / 7%);
       }
 
       .profile-head {
@@ -156,8 +156,8 @@
         width: 100%;
         min-height: 42px;
         border: 1px solid var(--line);
-        border-radius: 14px;
-        background: #fffaf7;
+        border-radius: 10px;
+        background: #fffdfa;
         color: var(--ink);
         padding: 0 12px;
       }
@@ -171,8 +171,8 @@
 
       .deck {
         position: relative;
-        height: min(64vh, 590px);
-        min-height: 470px;
+        height: min(62vh, 575px);
+        min-height: 455px;
         margin: 0 0 18px;
         isolation: isolate;
       }
@@ -185,12 +185,12 @@
         height: calc(100% - 34px);
         overflow: hidden;
         border: 0;
-        border-radius: 28px;
+        border-radius: 18px;
         padding: 0;
         text-align: left;
         color: #fff;
         background: #ddd;
-        box-shadow: 0 28px 54px rgb(37 29 34 / 20%);
+        box-shadow: 0 28px 54px rgb(34 31 28 / 20%);
         transition: transform 220ms ease, opacity 220ms ease;
         touch-action: pan-y;
       }
@@ -201,7 +201,7 @@
         left: 18px;
         right: 18px;
         height: 72px;
-        border-radius: 22px;
+        border-radius: 16px;
         opacity: .72;
         pointer-events: none;
         filter: saturate(.85);
@@ -222,7 +222,7 @@
         left: 36px;
         right: 36px;
         height: 54px;
-        border-radius: 20px;
+        border-radius: 14px;
         opacity: .34;
         pointer-events: none;
         z-index: -2;
@@ -248,7 +248,7 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: linear-gradient(180deg, transparent 42%, rgb(10 8 12 / 35%) 68%, rgb(10 8 12 / 86%));
+        background: linear-gradient(180deg, transparent 38%, rgb(10 8 12 / 34%) 64%, rgb(10 8 12 / 86%));
       }
 
       .card-info {
@@ -273,53 +273,55 @@
 
       .actions {
         display: grid;
-        grid-template-columns: 1fr 78px 1fr;
-        gap: 12px;
+        grid-template-columns: 1fr 80px 1fr;
+        gap: 10px;
         align-items: center;
+        padding-bottom: 10px;
       }
 
       .nav-action,
       .like {
         display: grid;
         place-items: center;
-        height: 62px;
+        min-height: 62px;
         border: 0;
-        border-radius: 999px;
+        border-radius: 16px;
         background: #fff;
         color: var(--ink);
-        font-size: 26px;
+        font-size: 15px;
         font-weight: 900;
-        box-shadow: 0 14px 28px rgb(37 29 34 / 12%);
+        letter-spacing: 0;
+        box-shadow: 0 14px 28px rgb(34 31 28 / 11%);
       }
 
       .nav-action {
         position: relative;
-        color: #5f5862;
+        min-width: 0;
+        border: 1px solid var(--line);
+        color: #fff;
+        background: #221f1c;
+        text-transform: uppercase;
       }
 
-      .nav-action::after {
-        position: absolute;
-        bottom: -21px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: var(--muted);
-        content: attr(aria-label);
-        font-size: 11px;
-        font-weight: 900;
-        white-space: nowrap;
+      .nav-action:active,
+      .like:active,
+      .primary:active,
+      .send:active {
+        transform: translateY(1px);
       }
 
       .like {
         height: 78px;
+        border-radius: 999px;
         color: #fff;
         font-size: 32px;
-        background: linear-gradient(135deg, var(--coral), var(--violet));
-        box-shadow: 0 18px 34px rgb(255 95 126 / 28%);
+        background: linear-gradient(135deg, var(--coral), var(--gold));
+        box-shadow: 0 18px 34px rgb(232 83 99 / 24%);
       }
 
       .hero-photo {
         position: relative;
-        min-height: 450px;
+        min-height: 430px;
         overflow: hidden;
         margin: 0 -16px 18px;
         background-image: var(--sheet);
@@ -349,14 +351,16 @@
 
       .subphoto {
         position: relative;
-        min-height: 150px;
+        aspect-ratio: 1 / 1;
+        min-height: 0;
         overflow: hidden;
         border: 0;
-        border-radius: 18px;
+        border-radius: 14px;
         background-image: var(--subimage);
         background-size: 200% 200%;
         background-position: var(--subpos);
-        box-shadow: 0 12px 24px rgb(37 29 34 / 10%);
+        background-repeat: no-repeat;
+        box-shadow: 0 12px 24px rgb(34 31 28 / 10%);
       }
 
       .subphoto::after {
@@ -379,7 +383,7 @@
         display: none;
         place-items: center;
         padding: 18px;
-        background: rgb(16 12 18 / 74%);
+        background: rgb(16 12 18 / 78%);
         backdrop-filter: blur(14px);
       }
 
@@ -389,13 +393,14 @@
 
       .modal-card {
         position: relative;
-        width: min(100%, 430px);
-        aspect-ratio: 4 / 5;
+        width: min(92vw, 560px);
+        aspect-ratio: 1 / 1;
         overflow: hidden;
-        border-radius: 28px;
+        border-radius: 18px;
         background-image: var(--modalimage);
         background-size: 200% 200%;
         background-position: var(--modalpos);
+        background-repeat: no-repeat;
         box-shadow: 0 30px 70px rgb(0 0 0 / 38%);
       }
 
@@ -418,9 +423,9 @@
         margin-bottom: 14px;
         padding: 16px;
         border: 1px solid var(--line);
-        border-radius: 20px;
-        background: linear-gradient(180deg, rgb(255 255 255 / 90%), rgb(255 250 247 / 78%));
-        box-shadow: 0 12px 24px rgb(37 29 34 / 6%);
+        border-radius: 16px;
+        background: rgb(255 255 255 / 92%);
+        box-shadow: 0 12px 24px rgb(34 31 28 / 6%);
       }
 
       .scenario {
@@ -428,14 +433,14 @@
         margin-bottom: 10px;
         padding: 14px;
         border: 1px solid var(--line);
-        border-radius: 16px;
-        background: #fff;
+        border-radius: 12px;
+        background: #fffdfa;
         text-align: left;
       }
 
       .scenario.selected {
         border-color: rgb(255 95 126 / 75%);
-        background: #fff0f4;
+        background: #fff2f3;
       }
 
       .primary {
@@ -445,8 +450,8 @@
         border-radius: 999px;
         color: #fff;
         font-weight: 900;
-        background: linear-gradient(135deg, var(--coral), var(--violet));
-        box-shadow: 0 14px 30px rgb(255 95 126 / 22%);
+        background: linear-gradient(135deg, var(--coral), var(--gold));
+        box-shadow: 0 14px 30px rgb(232 83 99 / 20%);
       }
 
       .primary:disabled { opacity: .45; cursor: default; }
@@ -457,7 +462,7 @@
         justify-content: space-between;
         padding: 14px 16px;
         border-bottom: 1px solid var(--line);
-        background: rgb(255 255 255 / 78%);
+        background: rgb(255 255 255 / 92%);
       }
 
       .mini {
@@ -484,7 +489,7 @@
         display: flex;
         gap: 8px;
         padding: 12px 16px;
-        background: #fff;
+        background: #fffdfa;
         border-top: 1px solid var(--line);
       }
 
@@ -494,19 +499,22 @@
         max-height: 110px;
         resize: vertical;
         border: 1px solid var(--line);
-        border-radius: 24px;
+        border-radius: 18px;
         padding: 12px 14px;
-        background: #fffaf7;
+        background: #fff;
       }
 
-      .send { min-width: 64px; border: 0; border-radius: 24px; color: #fff; font-weight: 900; background: var(--coral); }
+      .send { min-width: 70px; border: 0; border-radius: 18px; color: #fff; font-weight: 900; background: #221f1c; }
       .finish { margin: 0 16px 12px; }
       .muted { color: var(--muted); font-size: 13px; line-height: 1.45; }
+      .llm-status { display: inline-flex; align-items: center; gap: 6px; margin-top: 3px; color: var(--muted); font-size: 11px; }
+      .llm-dot { width: 7px; height: 7px; border-radius: 999px; background: var(--gold); }
+      .typing { opacity: .75; font-style: italic; }
 
       .score { margin-bottom: 14px; }
       .bar { height: 9px; overflow: hidden; border-radius: 999px; background: #efe3e7; }
       .fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--coral), var(--teal)); }
-      .rank { display: grid; place-items: center; margin-bottom: 16px; padding: 24px; border-radius: 22px; background: linear-gradient(135deg, #ffe36d, #ff94aa); }
+      .rank { display: grid; place-items: center; margin-bottom: 16px; padding: 24px; border-radius: 16px; background: linear-gradient(135deg, #f0cd74, #f08b96); }
       .rank strong { font-size: 52px; }
       .empty { display: grid; min-height: 50vh; place-items: center; text-align: center; color: var(--muted); }
     </style>
@@ -542,9 +550,9 @@
         </div>
         <div id="deck" class="deck"></div>
         <div class="actions">
-          <button class="nav-action" aria-label="戻る" onclick="prevCard()">‹</button>
+          <button class="nav-action" aria-label="PREV" onclick="prevCard()">PREV</button>
           <button class="like" onclick="likeCard()">♡</button>
-          <button class="nav-action" aria-label="次へ" onclick="nextCard()">›</button>
+          <button class="nav-action" aria-label="NEXT" onclick="nextCard()">NEXT</button>
         </div>
       </section>
 
@@ -572,7 +580,7 @@
         <div id="messages" class="messages"></div>
         <div class="composer">
           <textarea id="messageInput" maxlength="500" placeholder="メッセージを入力..."></textarea>
-          <button class="send" onclick="sendMessage()">送信</button>
+          <button id="sendButton" class="send" onclick="sendMessage()">送信</button>
         </div>
         <button class="primary finish" onclick="finishChat()">会話を終了して評価を見る</button>
       </section>
@@ -604,6 +612,13 @@
     <script>
       const STORAGE_KEY = "chat-match.sessions.v2";
       const USER_PROFILE_KEY = "chat-match.user-profile.v1";
+      const QWEN_ENDPOINT = "http://127.0.0.1:11434/api/chat";
+      const QWEN_MODELS = ["qwen2.5:7b", "qwen2.5", "qwen3:8b", "qwen3", "qwen:latest"];
+      const QWEN_OPENAI_ENDPOINTS = [
+        "http://127.0.0.1:1234/v1/chat/completions",
+        "http://127.0.0.1:8000/v1/chat/completions",
+      ];
+      const QWEN_OPENAI_MODELS = ["qwen2.5-7b-instruct", "qwen3-8b", "qwen2.5:7b", "qwen"];
       const jobOptions = [
         "未選択",
         "会社員",
@@ -664,6 +679,12 @@
       const setUserProfile = (profile) => localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profile));
       const byId = (items, id) => items.find((item) => item.id === id);
       const current = () => characters[state.index % characters.length];
+      const escapeHTML = (value) => String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\"", "&quot;")
+        .replaceAll("'", "&#39;");
 
       function showScreen(id) {
         document.querySelectorAll(".screen,.chat-screen").forEach((screen) => screen.classList.remove("active"));
@@ -790,24 +811,147 @@
         const character = byId(characters, state.characterId);
         const scenario = byId(scenarios, state.scenarioId);
         document.getElementById("chatHeader").innerHTML = `
-          <div class="mini"><div class="avatar" style="--pos:${character.pos}"></div><div><strong>${character.name}</strong><br><span class="muted">${scenario.name}</span></div></div>
+          <div class="mini"><div class="avatar" style="--pos:${character.pos}"></div><div><strong>${character.name}</strong><br><span class="muted">${scenario.name}</span><br><span class="llm-status"><span class="llm-dot"></span>Qwen local優先</span></div></div>
           <button class="icon-btn" onclick="showScreen('detail')">×</button>
         `;
         document.getElementById("messages").innerHTML = state.messages.length
-          ? state.messages.map((message) => `<div class="bubble ${message.role}">${message.content}</div>`).join("")
+          ? state.messages.map((message) => `<div class="bubble ${message.role} ${message.typing ? "typing" : ""}">${escapeHTML(message.content)}</div>`).join("")
           : `<div class="empty">マッチしました。最初のメッセージを送ってみましょう。</div>`;
+      }
+
+      function scenarioGoal() {
+        if (state.scenarioId === "date_invite") return "デートに誘われる場面。相手が安心できる具体性、タイミング、誠実さを自然に見ています。";
+        if (state.scenarioId === "continue_chat") return "会話を続ける場面。共感、質問、自分の話のバランスを自然に見ています。";
+        return "マッチ後の初回メッセージ。第一印象、清潔感、相手への興味が自然に伝わるかを見ています。";
+      }
+
+      function characterVoice(character) {
+        const voices = {
+          aoi: "少し人見知りで素直。短めでやさしい返信。急な距離詰めには少し戸惑う。",
+          riko: "おしゃれと街歩きが好き。軽やかで少し感性重視。センスのある一言に反応する。",
+          mio: "落ち着いたバリスタ。日常の小さな話題を丁寧に拾う。ゆっくりした会話を好む。",
+          hina: "誠実さと清潔感を重視。丁寧な言葉づかいで、急な誘いには慎重。",
+          yuna: "明るく気遣いに弱い看護師。忙しさをわかってくれる言葉に好感を持つ。",
+          sara: "知的なデザイナー。理由や考えを聞きたがる。短すぎる返事には物足りなさを感じる。",
+          eri: "テンポのいいマーケター。前向きな提案や少しユーモアのある会話に乗りやすい。",
+          mai: "穏やかな先生。言葉を丁寧に扱う人に安心する。価値観の話も好き。",
+          kaori: "自立した創業者。芯のある人を好む。軽すぎる誘いより尊重がある会話に反応する。",
+          natsuki: "自然体のヨガインストラクター。落ち着き、思いやり、無理のないペースを大事にする。",
+        };
+        return voices[character.id] || character.longBio;
+      }
+
+      async function askQwen(userText) {
+        const character = byId(characters, state.characterId);
+        const recentMessages = state.messages
+          .filter((message) => message.role !== "assistant" || !message.typing)
+          .slice(-8)
+          .map((message) => ({
+            role: message.role === "assistant" ? "assistant" : "user",
+            content: message.content,
+          }));
+        const systemPrompt = [
+          `あなたはマッチングアプリの会話相手「${character.name}」です。`,
+          `年齢: ${character.age}歳。職業/属性: ${character.role}。`,
+          `人物像: ${character.longBio}`,
+          `話し方: ${characterVoice(character)}`,
+          `練習場面: ${scenarioGoal()}`,
+          `ユーザー情報: ${userProfileText()}`,
+          "日本語で自然に会話してください。評価者のように説明せず、キャラクター本人として返信してください。",
+          "返信は1〜3文。会話が続くように、必要なら自然な質問を1つだけ入れてください。",
+          "相手が失礼、急すぎる、曖昧な場合は、そのキャラクターらしく少し慎重に返してください。",
+        ].join("\n");
+
+        for (const model of QWEN_MODELS) {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 18000);
+          try {
+            const response = await fetch(QWEN_ENDPOINT, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              signal: controller.signal,
+              body: JSON.stringify({
+                model,
+                stream: false,
+                messages: [
+                  { role: "system", content: systemPrompt },
+                  ...recentMessages,
+                ],
+                options: {
+                  temperature: 0.78,
+                  top_p: 0.9,
+                  num_predict: 160,
+                },
+              }),
+            });
+            clearTimeout(timer);
+            if (!response.ok) continue;
+            const data = await response.json();
+            const content = data?.message?.content?.trim();
+            if (content) return content;
+          } catch (error) {
+            clearTimeout(timer);
+          }
+        }
+        for (const endpoint of QWEN_OPENAI_ENDPOINTS) {
+          for (const model of QWEN_OPENAI_MODELS) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 18000);
+            try {
+              const response = await fetch(endpoint, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                signal: controller.signal,
+                body: JSON.stringify({
+                  model,
+                  messages: [
+                    { role: "system", content: systemPrompt },
+                    ...recentMessages,
+                  ],
+                  temperature: 0.78,
+                  top_p: 0.9,
+                  max_tokens: 180,
+                }),
+              });
+              clearTimeout(timer);
+              if (!response.ok) continue;
+              const data = await response.json();
+              const content = data?.choices?.[0]?.message?.content?.trim();
+              if (content) return content;
+            } catch (error) {
+              clearTimeout(timer);
+            }
+          }
+        }
+        return null;
       }
 
       function reply(text) {
         const character = byId(characters, state.characterId);
         const user = userProfileText();
-        if (state.scenarioId === "date_invite") return text.includes("？") || text.includes("?")
-          ? `誘ってくれてありがとう。${user}のことも少しわかっているので、具体的で安心できる誘い方だと前向きになりやすいです。`
-          : `${user}からのお誘い、うれしいです。場所や時間がもう少し見えると、安心して返事しやすいかも。`;
-        if (state.scenarioId === "continue_chat") return text.length > 24
-          ? `${user}らしさも少し見えて、ちゃんと話を広げようとしてくれているのが伝わります。もう少しあなたの感想も聞きたいです。`
-          : `${user}なんですね。そこからもう一歩、質問か自分の話を足すと自然に続きそう。`;
-        return `メッセージありがとう。${user}からの最初の一言として、相手への興味が入っていて返信しやすい雰囲気です。`;
+        const hasQuestion = text.includes("？") || text.includes("?");
+        const short = text.length < 18;
+        const tones = {
+          aoi: short ? "えっと、話しかけてくれてありがとう。もう少しだけ聞かせてもらえたら返しやすいかも。" : "ありがとう、そういうふうに言ってもらえるとちょっと安心します。どんなきっかけでそう思ったんですか？",
+          riko: hasQuestion ? "いいですね、その聞き方だと返したくなります。ちなみに、あなたは最近ハマってる場所とかありますか？" : "雰囲気は好きです。もう一言、あなたの好きなものも混ぜてくれたらもっと話しやすいかも。",
+          mio: "メッセージありがとうございます。ゆっくり話せそうな感じがしてうれしいです。今日はどんな一日でしたか？",
+          hina: "丁寧に話してくれてありがとうございます。自然で安心感があります。普段のお休みは何をして過ごすことが多いですか？",
+          yuna: "ありがとう、明るく話しかけてくれるのうれしいです。今日は少し忙しかったけど、こういうやりとりだと元気出ます。",
+          sara: "その言い方、ちゃんと考えてくれている感じがします。なぜそう思ったのかも少し聞いてみたいです。",
+          eri: "いいですね、テンポが合いそう。もう少し具体的に話してくれたら、次の話題にも乗りやすいです。",
+          mai: "やさしい言葉ですね。丁寧に話してくれる人だと安心します。最近、心に残った本や映画はありますか？",
+          kaori: "ありがとうございます。軽すぎない感じは好印象です。お互いの時間を大事にできる人だと話してみたくなります。",
+          natsuki: "自然体で話してくれる感じがいいですね。無理に盛り上げようとしすぎない会話、私は好きです。",
+        };
+        if (state.scenarioId === "date_invite") {
+          return hasQuestion
+            ? `${user}からのお誘い、うれしいです。場所や時間が見えて安心できるので、少し前向きに考えたいです。`
+            : `誘ってくれてありがとう。気持ちはうれしいけど、どこで何をするかもう少しわかると安心して返事しやすいです。`;
+        }
+        if (state.scenarioId === "continue_chat" && short) {
+          return `${tones[character.id]} もう少しだけ、あなたのことも聞かせてください。`;
+        }
+        return tones[character.id] || `${user}からのメッセージ、ちゃんと読ませてもらいました。もう少し話してみたいです。`;
       }
 
       function saveCurrentSession(evaluation) {
@@ -821,15 +965,31 @@
         setSessions(sessions);
       }
 
-      function sendMessage() {
+      async function sendMessage() {
         const input = document.getElementById("messageInput");
+        const sendButton = document.getElementById("sendButton");
         const text = input.value.trim();
-        if (!text) return;
+        if (!text || sendButton.disabled) return;
         input.value = "";
+        sendButton.disabled = true;
+        sendButton.textContent = "応答中";
         state.messages.push({ role: "user", content: text, timestamp: Date.now() });
-        state.messages.push({ role: "assistant", content: reply(text), timestamp: Date.now() });
+        const typingMessage = { role: "assistant", content: "Qwenで返信を考えています...", timestamp: Date.now(), typing: true };
+        state.messages.push(typingMessage);
         saveCurrentSession();
         renderChat();
+        const qwenReply = await askQwen(text);
+        const index = state.messages.indexOf(typingMessage);
+        const finalReply = qwenReply || reply(text);
+        if (index >= 0) {
+          state.messages[index] = { role: "assistant", content: finalReply, timestamp: Date.now(), llm: qwenReply ? "qwen" : "fallback" };
+        } else {
+          state.messages.push({ role: "assistant", content: finalReply, timestamp: Date.now(), llm: qwenReply ? "qwen" : "fallback" });
+        }
+        saveCurrentSession();
+        renderChat();
+        sendButton.disabled = false;
+        sendButton.textContent = "送信";
       }
 
       function evaluate() {
