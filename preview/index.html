@@ -109,6 +109,41 @@
         line-height: 1.45;
       }
 
+      .target-switch {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+
+      .target-option {
+        min-height: 58px;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgb(255 255 255 / 90%);
+        color: var(--ink);
+        text-align: left;
+        box-shadow: 0 10px 22px rgb(34 31 28 / 7%);
+      }
+
+      .target-option.selected {
+        border-color: rgb(232 83 99 / 76%);
+        background: #fff2f3;
+      }
+
+      .target-option strong {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 14px;
+      }
+
+      .target-option span {
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.35;
+      }
+
       .user-profile {
         margin-bottom: 16px;
         padding: 14px;
@@ -585,6 +620,16 @@
           <button class="history-pill" onclick="showHistory()">履歴</button>
         </div>
         <p class="subcopy">スワイプして相手を選び、いいねで会話練習へ。全キャラクターは18〜35歳です。</p>
+        <div class="target-switch" aria-label="会話相手の選択">
+          <button id="womenTarget" class="target-option selected" onclick="selectTargetGender('women')">
+            <strong>女性と話す</strong>
+            <span>女性キャラ10名から選ぶ</span>
+          </button>
+          <button id="menTarget" class="target-option" onclick="selectTargetGender('men')">
+            <strong>男性と話す</strong>
+            <span>男性キャラ10名から選ぶ</span>
+          </button>
+        </div>
         <div class="user-profile">
           <div class="profile-head">
             <strong>あなたのプロフィール</strong>
@@ -671,7 +716,10 @@
       const STORAGE_KEY = "chat-match.sessions.v2";
       const USER_PROFILE_KEY = "chat-match.user-profile.v1";
       const BUNDLED_ASSET_BASE = "assets/";
-      const BUNDLED_SHEET_IMAGE = "chat-match-characters-18-35.png";
+      const BUNDLED_SHEET_IMAGES = {
+        women: "chat-match-characters-18-35.png",
+        men: "chat-match-men-18-35.png",
+      };
       const QWEN_ENDPOINT = "http://127.0.0.1:11434/api/chat";
       const QWEN_MODELS = ["qwen2.5:7b", "qwen2.5", "qwen3:8b", "qwen3", "qwen:latest"];
       const QWEN_OPENAI_ENDPOINTS = [
@@ -726,6 +774,19 @@
         { id: "kaori", name: "香織", age: 32, role: "スタートアップ創業者", pos: "75% 100%", subImage: "sub-kaori.png", bio: "会社を経営しています。仕事も好きだけど、オフはごはんとワインでゆっくりしたい派です。", longBio: "小さな会社を経営している香織です。仕事は好きで毎日忙しいですが、オフの日はおいしいごはんとワインでゆっくり過ごしたいです。自立している人は好きですが、強がり合う関係より、お互いを尊重して自然に支え合える関係が理想です。会話では、相手の芯の強さや思いやりを見ています。", tags: ["founder", "drive", "wine"] },
         { id: "natsuki", name: "夏希", age: 35, role: "ヨガインストラクター", pos: "100% 100%", subImage: "sub-natsuki.png", bio: "ヨガインストラクターです。自然と朝の散歩が好き。無理せず自然体で話したいです。", longBio: "ヨガインストラクターの夏希です。朝の散歩、自然のある場所、体にやさしいごはんが好きです。にぎやかな場所も楽しいけれど、落ち着いて深い話ができる時間も大切にしています。無理にかっこつけるより、自然体で思いやりのある人に惹かれます。お互いのペースを大事にできたらうれしいです。", tags: ["yoga", "wellness", "nature"] },
       ];
+      const maleCharacters = [
+        { id: "haruto", name: "晴斗", age: 18, role: "大学1年生", pos: "0% 0%", subImage: "chat-match-men-18-35.png", bio: "大学で心理学を学んでいます。少し照れ屋だけど、誠実に話すタイプです。", longBio: "大学1年生の晴斗です。新しい場所に慣れる途中で、カフェで勉強したり映画を観たりするのが好きです。最初は少し緊張しますが、ゆっくり話してくれる人だと安心します。背伸びした会話より、素直なやりとりを大切にしたいです。", tags: ["student", "shy", "movie"] },
+        { id: "ren", name: "蓮", age: 20, role: "服飾学生", pos: "25% 0%", subImage: "chat-match-men-18-35.png", bio: "服と音楽が好きです。感性が合う人と、自然に盛り上がりたいです。", longBio: "服飾を学んでいる蓮です。古着屋巡りやライブに行くのが好きで、好きなものをちゃんと言葉にできる人に惹かれます。軽すぎるノリより、少し自分らしさが見える会話のほうが返したくなります。", tags: ["fashion", "music", "street"] },
+        { id: "takumi", name: "拓海", age: 22, role: "カフェスタッフ", pos: "50% 0%", subImage: "chat-match-men-18-35.png", bio: "カフェで働いています。落ち着いた会話と、何気ない日常の話が好きです。", longBio: "カフェスタッフの拓海です。コーヒーを淹れる時間と、仕事帰りに散歩する時間が好きです。派手な話題より、今日あったことを少しずつ共有できるような会話に安心します。質問ばかりより、お互いの話を混ぜながら話せるとうれしいです。", tags: ["coffee", "calm", "walk"] },
+        { id: "sota", name: "颯太", age: 24, role: "理学療法士", pos: "75% 0%", subImage: "chat-match-men-18-35.png", bio: "理学療法士です。丁寧で前向きな会話ができる人に惹かれます。", longBio: "理学療法士の颯太です。仕事柄、相手のペースを見ることや小さな変化に気づくことを大切にしています。休日は体を動かしたり、友だちとごはんに行ったりします。急に距離を詰めるより、自然に信頼を作っていける会話が好きです。", tags: ["health", "kind", "active"] },
+        { id: "yuto", name: "悠人", age: 25, role: "看護師", pos: "100% 0%", subImage: "chat-match-men-18-35.png", bio: "看護師です。忙しい日もありますが、明るく話せる時間を大切にしています。", longBio: "看護師の悠人です。シフトで忙しい日もありますが、休みの日はおいしいものを食べたり、外を歩いてリセットしています。気づかいや明るい言葉に弱いです。無理に盛り上げるより、自然に笑える会話ができたらうれしいです。", tags: ["nurse", "care", "bright"] },
+        { id: "kei", name: "圭", age: 27, role: "プロダクトデザイナー", pos: "0% 100%", subImage: "chat-match-men-18-35.png", bio: "デザイナーです。展示やインテリア、考えを言葉にする会話が好きです。", longBio: "プロダクトデザイナーの圭です。休日は展示会やインテリアショップに行くことが多いです。何が好きかだけでなく、なぜ好きなのかを話せる人に魅力を感じます。短い返事だけより、考えていることを少し聞かせてくれると会話を続けたくなります。", tags: ["design", "gallery", "smart"] },
+        { id: "daiki", name: "大輝", age: 28, role: "マーケター", pos: "25% 100%", subImage: "chat-match-men-18-35.png", bio: "マーケターです。新しい店探しや旅行計画が好き。テンポよく話せます。", longBio: "マーケティングの仕事をしている大輝です。新しい店を見つけたり、週末の予定を考えたりするのが好きです。ずっと真面目すぎるより、少し笑える会話が理想です。返信のテンポが合う人、前向きに提案してくれる人とは自然に距離が縮まりやすいです。", tags: ["marketing", "city", "active"] },
+        { id: "ryo", name: "涼", age: 30, role: "小学校教員", pos: "50% 100%", subImage: "chat-match-men-18-35.png", bio: "小学校の先生です。本と映画、静かな場所での会話が好きです。", longBio: "小学校で先生をしている涼です。平日はにぎやかな毎日なので、休みの日は本を読んだり映画を観たり、静かなカフェで過ごすのが好きです。言葉を丁寧に扱える人に安心します。楽しいだけでなく、価値観も少しずつ知っていける会話ができたらうれしいです。", tags: ["teacher", "books", "warm"] },
+        { id: "akira", name: "彰", age: 32, role: "スタートアップ創業者", pos: "75% 100%", subImage: "chat-match-men-18-35.png", bio: "会社を経営しています。仕事も好きですが、オフはゆっくり過ごしたい派です。", longBio: "小さな会社を経営している彰です。仕事は好きで忙しいですが、オフの日はおいしいごはんを食べながらゆっくり過ごしたいです。自立している人は好きですが、強がり合うより、お互いを尊重して支え合える関係が理想です。", tags: ["founder", "drive", "dinner"] },
+        { id: "naoto", name: "直人", age: 35, role: "ヨガインストラクター", pos: "100% 100%", subImage: "chat-match-men-18-35.png", bio: "ヨガインストラクターです。自然体で、無理のない会話を大切にします。", longBio: "ヨガインストラクターの直人です。朝の散歩、自然のある場所、体にやさしいごはんが好きです。にぎやかな場所も楽しいですが、落ち着いて深い話ができる時間も大切にしています。無理にかっこつけるより、自然体で思いやりのある人に惹かれます。", tags: ["yoga", "nature", "wellness"] },
+      ];
+      const characterGroups = { women: characters, men: maleCharacters };
       const scenarios = [
         { id: "first_message", name: "初回メッセージ", description: "マッチ後の第一声。相手への興味と清潔感が大切です。" },
         { id: "continue_chat", name: "会話継続", description: "共感、質問、自分の話のバランスを練習します。" },
@@ -735,14 +796,15 @@
         { id: "scenario", name: "シナリオモード", description: "シナリオに基づき、自分のコミュニケーションをトレーニングするモードです。" },
         { id: "free", name: "フリーモード", description: "彼女たちと自由に会話を楽しむモードです。" },
       ];
-      let state = { index: 0, characterId: null, mode: "scenario", scenarioId: null, sessionId: null, messages: [] };
+      let state = { index: 0, targetGender: "women", characterId: null, mode: "scenario", scenarioId: null, sessionId: null, messages: [] };
 
       const getSessions = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
       const setSessions = (sessions) => localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
       const getUserProfile = () => JSON.parse(localStorage.getItem(USER_PROFILE_KEY) || "{\"name\":\"\",\"job\":\"\",\"age\":\"\"}");
       const setUserProfile = (profile) => localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(profile));
       const byId = (items, id) => items.find((item) => item.id === id);
-      const current = () => characters[state.index % characters.length];
+      const activeCharacters = () => characterGroups[state.targetGender] || characterGroups.women;
+      const current = () => activeCharacters()[state.index % activeCharacters().length];
       const bundledAsset = (fileName, version = 1) => `${BUNDLED_ASSET_BASE}${fileName}?v=${version}`;
       let swipeState = null;
       let suppressCardClick = false;
@@ -759,7 +821,8 @@
       }
 
       function renderDeck() {
-        const cards = [0, 1, 2].map((offset) => characters[(state.index + offset) % characters.length]);
+        const people = activeCharacters();
+        const cards = [0, 1, 2].map((offset) => people[(state.index + offset) % people.length]);
         document.getElementById("deck").innerHTML = cards.map((character, offset) => `
           <button class="match-card ${offset === 1 ? "next" : ""} ${offset === 2 ? "peek" : ""}" style="--pos:${character.pos}" data-card-offset="${offset}" data-character-id="${character.id}">
             <div class="photo"></div>
@@ -873,12 +936,28 @@
         return `${name}さん（${age}・${job}）`;
       }
 
-      function prevCard() { state.index = (state.index - 1 + characters.length) % characters.length; renderDeck(); }
-      function nextCard() { state.index = (state.index + 1) % characters.length; renderDeck(); }
+      function selectTargetGender(gender) {
+        state.targetGender = gender;
+        state.index = 0;
+        state.characterId = null;
+        document.getElementById("womenTarget").classList.toggle("selected", gender === "women");
+        document.getElementById("menTarget").classList.toggle("selected", gender === "men");
+        document.getElementById("appRoot").style.setProperty("--sheet", `url('${bundledAsset(BUNDLED_SHEET_IMAGES[gender], 3)}')`);
+        renderDeck();
+      }
+
+      function syncTargetGenderUI() {
+        document.getElementById("womenTarget").classList.toggle("selected", state.targetGender === "women");
+        document.getElementById("menTarget").classList.toggle("selected", state.targetGender === "men");
+        document.getElementById("appRoot").style.setProperty("--sheet", `url('${bundledAsset(BUNDLED_SHEET_IMAGES[state.targetGender], 3)}')`);
+      }
+
+      function prevCard() { state.index = (state.index - 1 + activeCharacters().length) % activeCharacters().length; renderDeck(); }
+      function nextCard() { state.index = (state.index + 1) % activeCharacters().length; renderDeck(); }
       function likeCard() { openProfile(current().id); }
 
       function openProfile(id) {
-        const character = byId(characters, id);
+        const character = byId(activeCharacters(), id);
         state.characterId = id;
         state.mode = "scenario";
         state.scenarioId = null;
@@ -891,7 +970,7 @@
         `;
         document.getElementById("gallery").innerHTML = photoStories(character).map((photo, index) => `
           <article class="subphoto-card">
-            <button class="subphoto" data-label="${photo.label}" style="--subimage:url('${bundledAsset(character.subImage)}'); --subpos:${subPosition(index)}" onclick="openPhotoModal('${character.subImage}', '${subPosition(index)}')"></button>
+            <button class="subphoto" data-label="${photo.label}" style="--subimage:url('${subPhotoAsset(character)}'); --subpos:${subPhotoPosition(character, index)}" onclick="openPhotoModal('${character.subImage}', '${subPhotoPosition(character, index)}')"></button>
             <div class="subcomment"><strong>${photo.label}</strong><span>${photo.comment}</span></div>
           </article>
         `).join("");
@@ -913,6 +992,15 @@
         const x = (index % 2) * 100;
         const y = Math.floor(index / 2) * 100;
         return `${x}% ${y}%`;
+      }
+
+      function subPhotoAsset(character) {
+        return bundledAsset(character.subImage, character.subImage === BUNDLED_SHEET_IMAGES.men ? 3 : 1);
+      }
+
+      function subPhotoPosition(character, index) {
+        if (character.subImage === BUNDLED_SHEET_IMAGES.men) return character.pos;
+        return subPosition(index);
       }
 
       function openPhotoModal(image, position) {
@@ -960,14 +1048,14 @@
         const activeScenarioId = state.mode === "free" ? "free_chat" : state.scenarioId;
         state.scenarioId = activeScenarioId;
         const sessions = getSessions();
-        sessions.unshift({ id: state.sessionId, characterId: state.characterId, mode: state.mode, scenarioId: activeScenarioId, userProfile: getUserProfile(), createdAt: now, updatedAt: now, messages: [] });
+        sessions.unshift({ id: state.sessionId, targetGender: state.targetGender, characterId: state.characterId, mode: state.mode, scenarioId: activeScenarioId, userProfile: getUserProfile(), createdAt: now, updatedAt: now, messages: [] });
         setSessions(sessions);
         renderChat();
         showScreen("chat");
       }
 
       function renderChat() {
-        const character = byId(characters, state.characterId);
+        const character = byId(activeCharacters(), state.characterId);
         const scenario = getScenarioInfo(state.scenarioId);
         document.getElementById("chatHeader").innerHTML = `
           <div class="mini"><div class="avatar" style="--pos:${character.pos}"></div><div><strong>${character.name}</strong><br><span class="muted">${scenario.name}</span></div></div>
@@ -1007,7 +1095,7 @@
       }
 
       async function askQwen(userText) {
-        const character = byId(characters, state.characterId);
+        const character = byId(activeCharacters(), state.characterId);
         const recentMessages = state.messages
           .filter((message) => message.role !== "assistant" || !message.typing)
           .slice(-8)
@@ -1092,7 +1180,7 @@
       }
 
       function reply(text) {
-        const character = byId(characters, state.characterId);
+        const character = byId(activeCharacters(), state.characterId);
         const user = userProfileText();
         const hasQuestion = text.includes("？") || text.includes("?");
         const short = text.length < 18;
@@ -1190,7 +1278,7 @@
       function showHistory() {
         const sessions = getSessions();
         document.getElementById("historyList").innerHTML = sessions.length ? sessions.map((session) => {
-          const character = byId(characters, session.characterId);
+          const character = byId(characterGroups[session.targetGender || "women"] || characterGroups.women, session.characterId);
           const scenario = getScenarioInfo(session.scenarioId);
           return `<button class="scenario" onclick="openHistory('${session.id}')"><strong>${character.name}, ${character.age}</strong><br><span class="muted">${scenario.name}・ランク ${session.evaluation?.rank || "-"}・${new Date(session.updatedAt).toLocaleDateString("ja-JP")}</span></button>`;
         }).join("") : `<div class="empty">まだ会話履歴がありません</div>`;
@@ -1200,13 +1288,14 @@
       function openHistory(id) {
         const session = getSessions().find((item) => item.id === id);
         if (!session) return;
-        state = { ...state, characterId: session.characterId, mode: session.mode || (session.scenarioId === "free_chat" ? "free" : "scenario"), scenarioId: session.scenarioId, sessionId: session.id, messages: session.messages || [] };
+        state = { ...state, targetGender: session.targetGender || "women", characterId: session.characterId, mode: session.mode || (session.scenarioId === "free_chat" ? "free" : "scenario"), scenarioId: session.scenarioId, sessionId: session.id, messages: session.messages || [] };
+        syncTargetGenderUI();
         renderResult(session.evaluation || evaluate());
         showScreen("results");
       }
 
       renderUserProfileForm();
-      document.getElementById("appRoot").style.setProperty("--sheet", `url('${bundledAsset(BUNDLED_SHEET_IMAGE, 3)}')`);
+      syncTargetGenderUI();
       renderDeck();
     </script>
   </body>
