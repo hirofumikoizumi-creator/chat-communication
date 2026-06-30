@@ -720,6 +720,12 @@
         women: "chat-match-characters-18-35.png",
         men: "chat-match-men-18-35.png",
       };
+      const MALE_SUBPHOTO_IMAGES = [
+        "chat-match-men-18-35.png",
+        "chat-match-men-work-18-35.png",
+        "chat-match-men-weekend-18-35.png",
+        "chat-match-men-place-18-35.png",
+      ];
       const QWEN_ENDPOINT = "http://127.0.0.1:11434/api/chat";
       const QWEN_MODELS = ["qwen2.5:7b", "qwen2.5", "qwen3:8b", "qwen3", "qwen:latest"];
       const QWEN_OPENAI_ENDPOINTS = [
@@ -970,7 +976,7 @@
         `;
         document.getElementById("gallery").innerHTML = photoStories(character).map((photo, index) => `
           <article class="subphoto-card">
-            <button class="subphoto" data-label="${photo.label}" style="--subimage:url('${subPhotoAsset(character)}'); --subpos:${subPhotoPosition(character, index)}; --subsize:${subPhotoSize(character)}" onclick="openPhotoModal('${character.subImage}', '${subPhotoPosition(character, index)}', '${subPhotoSize(character)}')"></button>
+            <button class="subphoto" data-label="${photo.label}" style="--subimage:url('${subPhotoAsset(character, index)}'); --subpos:${subPhotoPosition(character, index)}; --subsize:${subPhotoSize(character)}" onclick="openPhotoModal('${subPhotoFile(character, index)}', '${subPhotoPosition(character, index)}', '${subPhotoSize(character)}')"></button>
             <div class="subcomment"><strong>${photo.label}</strong><span>${photo.comment}</span></div>
           </article>
         `).join("");
@@ -980,6 +986,14 @@
       }
 
       function photoStories(character) {
+        if (character.subImage === BUNDLED_SHEET_IMAGES.men) {
+          return [
+            { label: "日常", comment: "これは普段の自分に近い一枚です。気取った話より、何気ないことから話せると落ち着きます。" },
+            { label: "仕事", comment: `仕事中はけっこう集中しています。${character.role}のことも、自然に聞いてくれるとうれしいです。` },
+            { label: "休日", comment: "休みの日は少し力を抜いて過ごしたいです。あなたの休日の過ごし方も聞いてみたいです。" },
+            { label: "好きな場所", comment: "落ち着ける場所が好きです。もし一緒に行くなら、こういう雰囲気だと話しやすいです。" },
+          ];
+        }
         return [
           { label: "日常", comment: "これは何気ない日の一枚。こういう普段の話から始めてくれると、私は返しやすいです。" },
           { label: "仕事", comment: `仕事中はけっこう真剣です。${character.role}の話も、自然に聞いてくれるとうれしいです。` },
@@ -994,8 +1008,15 @@
         return `${x}% ${y}%`;
       }
 
-      function subPhotoAsset(character) {
-        return bundledAsset(character.subImage, character.subImage === BUNDLED_SHEET_IMAGES.men ? 3 : 1);
+      function subPhotoFile(character, index) {
+        if (character.subImage === BUNDLED_SHEET_IMAGES.men) {
+          return MALE_SUBPHOTO_IMAGES[index] || BUNDLED_SHEET_IMAGES.men;
+        }
+        return character.subImage;
+      }
+
+      function subPhotoAsset(character, index) {
+        return bundledAsset(subPhotoFile(character, index), character.subImage === BUNDLED_SHEET_IMAGES.men ? 3 : 1);
       }
 
       function subPhotoPosition(character, index) {
