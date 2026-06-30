@@ -406,7 +406,7 @@
         border: 0;
         border-radius: 0;
         background-image: var(--subimage);
-        background-size: 200% 200%;
+        background-size: var(--subsize, 200% 200%);
         background-position: var(--subpos);
         background-repeat: no-repeat;
       }
@@ -463,7 +463,7 @@
         overflow: hidden;
         border-radius: 18px;
         background-image: var(--modalimage);
-        background-size: 200% 200%;
+        background-size: var(--modalsize, 200% 200%);
         background-position: var(--modalpos);
         background-repeat: no-repeat;
         box-shadow: 0 30px 70px rgb(0 0 0 / 38%);
@@ -970,7 +970,7 @@
         `;
         document.getElementById("gallery").innerHTML = photoStories(character).map((photo, index) => `
           <article class="subphoto-card">
-            <button class="subphoto" data-label="${photo.label}" style="--subimage:url('${subPhotoAsset(character)}'); --subpos:${subPhotoPosition(character, index)}" onclick="openPhotoModal('${character.subImage}', '${subPhotoPosition(character, index)}')"></button>
+            <button class="subphoto" data-label="${photo.label}" style="--subimage:url('${subPhotoAsset(character)}'); --subpos:${subPhotoPosition(character, index)}; --subsize:${subPhotoSize(character)}" onclick="openPhotoModal('${character.subImage}', '${subPhotoPosition(character, index)}', '${subPhotoSize(character)}')"></button>
             <div class="subcomment"><strong>${photo.label}</strong><span>${photo.comment}</span></div>
           </article>
         `).join("");
@@ -1003,11 +1003,16 @@
         return subPosition(index);
       }
 
-      function openPhotoModal(image, position) {
+      function subPhotoSize(character) {
+        return character.subImage === BUNDLED_SHEET_IMAGES.men ? "500% 200%" : "200% 200%";
+      }
+
+      function openPhotoModal(image, position, size = "200% 200%") {
         const modal = document.getElementById("photoModal");
         const card = document.getElementById("modalCard");
         card.style.setProperty("--modalimage", `url('${bundledAsset(image)}')`);
         card.style.setProperty("--modalpos", position);
+        card.style.setProperty("--modalsize", size);
         modal.classList.add("active");
       }
 
