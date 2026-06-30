@@ -514,6 +514,13 @@
         margin-bottom: 14px;
       }
 
+      .mode-section-title {
+        margin: 0 0 9px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
       .mode-card {
         width: 100%;
         padding: 14px;
@@ -535,7 +542,33 @@
       }
 
       .scenario-group {
-        margin-top: 4px;
+        margin-top: 10px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+      }
+
+      .scenario-group-title {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .scenario-group-title strong {
+        font-size: 14px;
+      }
+
+      .scenario-mission {
+        display: block;
+        margin-top: 8px;
+        padding: 9px 10px;
+        border-radius: 10px;
+        background: rgb(31 159 145 / 9%);
+        color: #27736c;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1.45;
       }
 
       .primary {
@@ -794,13 +827,13 @@
       ];
       const characterGroups = { women: characters, men: maleCharacters };
       const scenarios = [
-        { id: "first_message", name: "初回メッセージ", description: "マッチ後の第一声。相手への興味と清潔感が大切です。" },
-        { id: "continue_chat", name: "会話継続", description: "共感、質問、自分の話のバランスを練習します。" },
-        { id: "date_invite", name: "デート誘導", description: "相手が安心できる誘い方とタイミングを練習します。" },
+        { id: "first_message", name: "初回メッセージ", description: "マッチ後の最初の一言を練習します。", mission: "ゴール: 相手のプロフィールに触れながら、警戒されない自然な第一声を送る。" },
+        { id: "continue_chat", name: "会話継続", description: "会話を途切れさせず、自然に広げる練習です。", mission: "ゴール: 共感、質問、自分の話をバランスよく入れて、相手が返信しやすい流れを作る。" },
+        { id: "date_invite", name: "デート誘導", description: "会話からデート提案へ進める練習です。", mission: "ゴール: 相手の安心感を保ちながら、場所・理由・タイミングが自然な誘い方をする。" },
       ];
       const modes = [
-        { id: "scenario", name: "シナリオモード", description: "シナリオに基づき、自分のコミュニケーションをトレーニングするモードです。" },
-        { id: "free", name: "フリーモード", description: "相手と自由に会話を楽しむモードです。" },
+        { id: "scenario", name: "シナリオモード", description: "ミッションを選び、目的に沿ってコミュニケーションを練習します。" },
+        { id: "free", name: "フリーモード", description: "ミッションなしで、相手と自由に自然な会話を楽しみます。" },
       ];
       let state = { index: 0, targetGender: "women", characterId: null, mode: "scenario", scenarioId: null, sessionId: null, messages: [] };
 
@@ -1072,13 +1105,26 @@
           </button>
         `).join("");
         const scenarioCards = state.mode === "scenario"
-          ? `<div class="scenario-group">${scenarios.map((scenario) => `
+          ? `<div class="scenario-group">
+              <div class="scenario-group-title">
+                <strong>シナリオモード内のミッション</strong>
+                <span class="muted">1つ選択</span>
+              </div>
+              ${scenarios.map((scenario) => `
               <button class="scenario ${state.scenarioId === scenario.id ? "selected" : ""}" onclick="selectScenario('${scenario.id}')">
-                <strong>${scenario.name}</strong><span class="muted">${scenario.description}</span>
+                <strong>${scenario.name}</strong>
+                <span class="muted">${scenario.description}</span>
+                <span class="scenario-mission">${scenario.mission}</span>
               </button>
             `).join("")}</div>`
-          : `<div class="scenario-group"><p class="muted">テーマを決めず、相手のプロフィールや今の気分に合わせて自然に会話します。</p></div>`;
-        document.getElementById("scenarios").innerHTML = `<div class="mode-grid">${modeCards}</div>${scenarioCards}`;
+          : `<div class="scenario-group">
+              <div class="scenario-group-title">
+                <strong>フリーモード</strong>
+                <span class="muted">ミッションなし</span>
+              </div>
+              <p class="muted">テーマを決めず、相手のプロフィールや今の気分に合わせて自然に会話します。</p>
+            </div>`;
+        document.getElementById("scenarios").innerHTML = `<p class="mode-section-title">会話モード</p><div class="mode-grid">${modeCards}</div>${scenarioCards}`;
         document.getElementById("startButton").disabled = state.mode === "scenario" && !state.scenarioId;
         document.getElementById("startButton").textContent = state.mode === "free" ? "フリートークを始める" : "マッチしてチャット開始";
       }
@@ -1118,9 +1164,8 @@
 
       function scenarioGoal() {
         if (state.scenarioId === "free_chat") return "自由会話。トレーニング感を出さず、相手本人として自然な雑談や関係づくりの会話を楽しみます。";
-        if (state.scenarioId === "date_invite") return "デートに誘われる場面。相手が安心できる具体性、タイミング、誠実さを自然に見ています。";
-        if (state.scenarioId === "continue_chat") return "会話を続ける場面。共感、質問、自分の話のバランスを自然に見ています。";
-        return "マッチ後の初回メッセージ。第一印象、清潔感、相手への興味が自然に伝わるかを見ています。";
+        const scenario = byId(scenarios, state.scenarioId);
+        return scenario ? `${scenario.name}: ${scenario.mission}` : "マッチ後の初回メッセージ。相手のプロフィールに触れながら、警戒されない自然な第一声を送る場面です。";
       }
 
       function getScenarioInfo(id) {
